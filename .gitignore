@@ -1,12 +1,38 @@
+# 의존성·빌드 결과
 node_modules/
 .next/
 out/
+*.tsbuildinfo
+next-env.d.ts
+
+# 테스트·확인 화면 결과
 coverage/
 preview/
 playwright-report/
 test-results/
-*.tsbuildinfo
-next-env.d.ts
+/playwright/.cache/
+
+# 환경 변수 (예시 파일만 올린다)
+.env
 .env*.local
-.DS_Store
+!.env.example
+
+# 배포
 .vercel
+
+# 로그·캐시
+npm-debug.log*
+.eslintcache
+
+# Claude Code 개인 설정 (CLAUDE.md는 올린다)
+CLAUDE.local.md
+.claude/settings.local.json
+
+# 에디터·OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# 인증서·키
+*.pem
