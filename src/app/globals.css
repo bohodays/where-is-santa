@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 디자인 토큰 (화면 시안 기준 임시값, 2주차에 확정) */
+:root {
+  --color-night: #0b1830;
+  --color-ink: #13213d;
+  --color-ink-soft: #4a5875;
+  --color-surface: #ffffff;
+  --color-santa: #d6453b;
+  --color-gold: #f2c14e;
+  --font-display: 'Jua', 'IBM Plex Sans KR', sans-serif;
+  --font-sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-night);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
