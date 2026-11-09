@@ -3,6 +3,9 @@
 크리스마스이브에 산타의 현재 위치와 우리 동네 도착까지 남은 시간을 보여주는 웹 서비스.
 2026년 12월 24일 공개 예정.
 
+- 배포 주소: https://where-is-santa.vercel.app (개발 중인 임시 화면, main에 머지하면 자동 배포)
+- 데모: https://where-is-santa.vercel.app/?demo=2026-12-25T00:20:00%2B09:00&speed=60
+
 기획, 디자인, 구현, 테스트, 자동화 전 과정을 AI와 함께 진행하고,
 AI를 어떻게 통제하고 검증했는지를 [`docs/ai-log.md`](docs/ai-log.md)에 기록한다.
 AI 작업 규칙은 [`CLAUDE.md`](CLAUDE.md), 기획서는 [`docs/plan.md`](docs/plan.md).
