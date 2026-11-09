@@ -1,10 +1,11 @@
 # 지도 성능 시험 (MapLibre + OpenFreeMap)
 
-`spike/maplibre` 브랜치 전용. 결과를 보고 지도 라이브러리를 확정한 뒤, 시험 코드는 지운다.
+**결정 (2026-11-09): MapLibre GL 사용 확정, 조정 후 유지.** 조정 내용은 아래 "판단"에 있다.
 
-- 시험 화면: `/spike/map` (`src/components/spike/MapSpike.tsx`)
+- 시험 화면 코드는 main에 넣지 않았다. PR #8(`spike/maplibre`, 머지하지 않고 닫음)의 `src/components/spike/MapSpike.tsx`에 남아 있다.
 - 기획서 목표: 모바일 LCP 2.5초 이내, 저사양 폰에서 산타 이동 60fps
-- `maplibre-gl` 6.16.0 (2026-10-25 배포, BSD-3-Clause). 최신 6.17.0은 나온 지 이틀이라 쓰지 않았다.
+- `maplibre-gl` 6.16.0 (2026-10-25 배포, BSD-3-Clause). 시험 당시 최신 6.17.0은 나온 지 이틀이라 쓰지 않았다.
+- 아래 "측정 방법"의 주소는 시험 브랜치 미리보기 기준이다. 저사양 폰 재측정 때는 PR #8 브랜치를 다시 배포하거나, 본 지도 화면에 같은 측정 패널을 붙여 잰다.
 
 ## 측정 방법
 
