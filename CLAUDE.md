@@ -22,6 +22,8 @@ AI(Claude Code 등)가 이 저장소에서 작업할 때 반드시 따르는 규
 
 - `src/lib/santa/` — 경로·시간 계산. **순수 함수만.** React, 브라우저 API, `Date.now()` 호출 금지
 - `src/hooks/` — 시각·위치 등 브라우저 상태를 읽는 훅. 현재 시각은 반드시 `useNow()`로 얻는다
+  - 프레임마다 시각이 필요한 애니메이션(requestAnimationFrame)은 `useClock()`을 쓴다. 둘 다 같은 보정 시계를 읽는다
+  - 기기 시계는 틀릴 수 있다. `Date.now()`를 화면 시각으로 직접 쓰지 않는다
 - `src/components/` — 화면 조각. 계산은 `lib`에 맡기고 표시만 한다
 - `src/app/` — 라우트와 레이아웃
 - `scripts/` — 빌드 시 실행하는 스크립트(경로 데이터 생성, 확인 화면)
