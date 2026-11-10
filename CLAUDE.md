@@ -15,6 +15,7 @@ AI(Claude Code 등)가 이 저장소에서 작업할 때 반드시 따르는 규
 - 지도: MapLibre GL JS(`maplibre-gl`, 버전 고정) + OpenFreeMap 타일. 근거와 측정값은 `docs/spike-maplibre.md`
   - 워커 파일은 `scripts/copy-maplibre-worker.mjs`가 빌드 전에 `public/maplibre/`로 복사하고, `setWorkerUrl`로 지정한다
   - 첫 화면은 글자(카운트다운)를 먼저 보여주고 지도는 나중에 불러온다. 지도 JS를 첫 화면 번들에 넣지 않는다
+  - 지도는 없어도 서비스가 돌아가야 한다. OpenFreeMap 스타일·타일이 실패하거나 응답이 없으면 자체 윤곽 지도(Natural Earth, `public/maps/`)로 바꾸고, 지도 JS를 못 불러오면 글자만 보여준다. 근거는 `docs/spike-map-fallback.md`
 - 테스트: Vitest(로직), Playwright(E2E, 3주차부터)
 - 새 의존성이 필요하면 코드를 쓰기 전에 이유와 대안을 먼저 제안하고 승인을 받는다.
 
