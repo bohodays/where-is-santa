@@ -6,7 +6,7 @@
 - **B. 자체 윤곽 지도:** OpenFreeMap 스타일·타일이 실패하거나 응답이 없으면 Natural Earth 육지 윤곽(정적 파일)으로 바꾼다.
 - **보류:** 기획서의 대안이던 PMTiles 자체 호스팅. `pmtiles` 의존성, 저장소 계정, 이브 밤 트래픽 비용이 필요하다. 이 서비스는 세계 전체를 보는 낮은 확대 수준이 대부분이라 윤곽 지도로 충분하다고 판단했다.
 
-시험 코드는 main에 넣지 않았다. `spike/map-fallback` 브랜치(커밋 `6626f45`)의 `src/components/spike/FallbackMapSpike.tsx`에 있다.
+시험 코드는 main에 넣지 않았다. 태그 `archive/spike-map-fallback`(커밋 `6626f45`)의 `src/components/spike/FallbackMapSpike.tsx`에 있다. 시험 브랜치는 지웠다.
 
 ## 윤곽 지도 데이터
 
