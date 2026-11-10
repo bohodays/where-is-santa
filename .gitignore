@@ -38,3 +38,6 @@ Thumbs.db
 *.pem
 # 빌드 때 node_modules에서 복사하는 파일
 /public/maplibre/
+
+# 원본 데이터 (공공데이터포털에서 받는다. scripts/build-sigungu.mjs 참고)
+/SGIS/
