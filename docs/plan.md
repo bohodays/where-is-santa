@@ -99,7 +99,7 @@ MVP는 모두를 위한 핵심 3개에 공유 카드와 데모 모드를 더한 
 
 ### 먼저 확인할 것
 
-- [ ] 국내 시군구 좌표 데이터의 출처와 라이선스(공공누리 유형) 확정
+- [x] 국내 시군구 좌표 데이터의 출처와 라이선스(공공누리 유형) 확정 → 국가데이터처 SGIS 행정구역 경계(이용허락범위 제한 없음), `docs/data-sigungu.md`
 - [ ] OpenFreeMap 장애 시 PMTiles로 자동 전환되는지 확인
 - [ ] 지도 화면 출처 표기: OpenFreeMap, OpenMapTiles, OpenStreetMap, GeoNames
 
