@@ -80,7 +80,7 @@ MVP는 모두를 위한 핵심 3개에 공유 카드와 데모 모드를 더한 
 | 프레임워크       | Next.js(App Router) + TypeScript                                                      | 메신저 링크 미리보기는 JS를 실행하지 않아서, 공유 카드 OG 이미지를 서버에서 만들어야 한다                                       | Vite SPA + 별도 OG 함수                                                        |
 | 배포             | Vercel(정적 페이지 + OG 이미지 라우트)                                                | 본문은 CDN 캐시로 이브 밤 트래픽을 버틴다. Hobby 플랜은 비상업용이라 개인 프로젝트에 맞다                                       | Cloudflare Pages                                                               |
 | 지도 렌더링      | MapLibre GL JS                                                                        | 오픈소스, 벡터 타일과 스타일을 직접 통제, 크리스마스 테마 색 적용 가능                                                          | Leaflet + 래스터 타일                                                          |
-| 지도 타일        | OpenFreeMap                                                                           | 무료, API 키 없음, 상업적 이용 가능, 출처 표기 필수. 다만 SLA가 없다                                                            | Protomaps PMTiles를 저줌만 잘라 Cloudflare R2에 자체 호스팅(이브 밤 대비 예비) |
+| 지도 타일        | OpenFreeMap                                                                           | 무료, API 키 없음, 상업적 이용 가능, 출처 표기 필수. 다만 SLA가 없다                                                            | Natural Earth 육지 윤곽(정적 파일)으로 자동 전환. PMTiles 자체 호스팅은 보류 |
 | 세계 도시 데이터 | GeoNames cities15000                                                                  | 인구 1.5만 이상 도시 약 2.5만 개, 좌표·인구·IANA 타임존 포함, CC BY 4.0                                                         | Natural Earth populated places                                                 |
 | 국내 동네 데이터 | 시군구 단위 중심 좌표(공공 경계 데이터에서 추출)                                      | 동네 검색과 '내 위치' 최근접 계산을 API 없이 클라이언트에서 처리                                                                | 행정구역 코드 목록 + 지오코딩 1회                                              |
 | 시간대 정보      | 빌드 스크립트에서 Intl API(Node 내장)                                                 | 도착 규칙은 경도만 쓰고, 시간대는 날짜변경선 보정과 현지 시각 표시에만 필요하다. 12월 25일 기준 UTC 오프셋을 빌드 때 한 번 계산 | Luxon, date-fns-tz                                                             |
@@ -100,7 +100,7 @@ MVP는 모두를 위한 핵심 3개에 공유 카드와 데모 모드를 더한 
 ### 먼저 확인할 것
 
 - [x] 국내 시군구 좌표 데이터의 출처와 라이선스(공공누리 유형) 확정 → 국가데이터처 SGIS 행정구역 경계(이용허락범위 제한 없음), `docs/data-sigungu.md`
-- [ ] OpenFreeMap 장애 시 PMTiles로 자동 전환되는지 확인
+- [x] OpenFreeMap 장애 시 대응 확인 → PMTiles 대신 자체 윤곽 지도(Natural Earth)로 자동 전환, 지도 JS를 못 불러오면 글자만. `docs/spike-map-fallback.md`
 - [ ] 지도 화면 출처 표기: OpenFreeMap, OpenMapTiles, OpenStreetMap, GeoNames
 
 출처: [OpenFreeMap](https://openfreemap.org) · [GeoNames 덤프 설명서](https://android.googlesource.com/platform/external/geonames/+/7a853d30915d91f323de5649b130afbd00e609de/export/dump/readme.txt) · [Protomaps FAQ](https://protomaps.com/faq)
