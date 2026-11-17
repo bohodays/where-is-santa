@@ -1,30 +1,30 @@
 # 컴포넌트 목록
 
-2주차에 확정한 화면 시안(디자인 캔버스 "산타 어디쯤 화면 시안" 1안)을 3주차 구현 단위로 나눈 목록이다.
+2주차에 확정한 화면 시안(디자인 캔버스 "산타 어디쯤 화면 시안" 1안)을 3~4주차(핵심 기능 구현)와 5주차(공유 카드·데모 모드)의 구현 단위로 나눈 목록이다.
 색·글자 크기는 `docs/design-tokens.md`의 토큰만 쓰고, 컴포넌트마다 같은 PR에서 스토리를 추가한다(CLAUDE.md).
 
 - **서버/클라이언트:** CLAUDE.md대로 서버 컴포넌트가 기본이다. 상태·브라우저 API·시각이 필요할 때만 `'use client'`.
 - **시각:** 글자로 보여주는 시각은 `useNow()`, 프레임마다 움직이는 것은 `useClock()`. 산타 위치는 `santaAt()`로만 계산한다.
-- **주차:** 기획서 일정 기준. 3주차 = 11/23~12/6(지도, 카운트다운, 동네 선택), 5주차 = 12/7~13(공유 카드, 데모 모드).
+- **주차:** 기획서 일정 기준. 3~4주차 = 11/23~12/6 핵심 기능 구현(경로 데이터 생성 스크립트, 지도, 카운트다운, 동네 선택), 5주차 = 12/7~13 공유 카드·데모 모드, 12/13 MVP 배포.
 
 ## 한눈에 보기
 
 | 구분 | 컴포넌트 | 시안 | 종류 | 주차 |
 |---|---|---|---|---|
-| 기본 | `Button` · `LinkButton` | 전체 | 서버 | 3 |
-| 기본 | `IconButton` | 1, 시트 닫기 | 서버 | 3 |
-| 기본 | `Switch` | 5 | 클라이언트 | 3 |
-| 기본 | `SegmentedControl` | 3, 5 | 클라이언트 | 3 |
-| 기본 | `BottomSheet` | 1, 1-2, 2, 4, 5 | 클라이언트 | 3 |
-| 지도 | `SantaMap` | 1, 1-1 | 클라이언트(동적 import) | 3 |
-| 지도 | `MapAttribution` | 1, 1-1 | 서버 | 3 |
-| 메인 | `SantaLocationBanner` | 1, 1-1 | 클라이언트 | 3 |
-| 메인 | `CountdownCard` | 1, 1-1 | 클라이언트 | 3 |
-| 메인 | `JourneyProgress` | 1, 1-1 | 클라이언트 | 3 |
-| 시트 | `ArrivalList` | 1-2 | 클라이언트 | 3 |
-| 시트 | `NeighborhoodPicker` | 4 | 클라이언트 | 3 |
-| 시트 | `SettingsPanel` | 5 | 클라이언트 | 3 |
-| 시트 | `AttributionBox` | 5 | 서버 | 3 |
+| 기본 | `Button` · `LinkButton` | 전체 | 서버 | 3~4 |
+| 기본 | `IconButton` | 1, 시트 닫기 | 서버 | 3~4 |
+| 기본 | `Switch` | 5 | 클라이언트 | 3~4 |
+| 기본 | `SegmentedControl` | 3, 5 | 클라이언트 | 3~4 |
+| 기본 | `BottomSheet` | 1, 1-2, 2, 4, 5 | 클라이언트 | 3~4 |
+| 지도 | `SantaMap` | 1, 1-1 | 클라이언트(동적 import) | 3~4 |
+| 지도 | `MapAttribution` | 1, 1-1 | 서버 | 3~4 |
+| 메인 | `SantaLocationBanner` | 1, 1-1 | 클라이언트 | 3~4 |
+| 메인 | `CountdownCard` | 1, 1-1 | 클라이언트 | 3~4 |
+| 메인 | `JourneyProgress` | 1, 1-1 | 클라이언트 | 3~4 |
+| 시트 | `ArrivalList` | 1-2 | 클라이언트 | 3~4 |
+| 시트 | `NeighborhoodPicker` | 4 | 클라이언트 | 3~4 |
+| 시트 | `SettingsPanel` | 5 | 클라이언트 | 3~4 |
+| 시트 | `AttributionBox` | 5 | 서버 | 3~4 |
 | 공유 | `SharePanel` | 2 | 클라이언트 | 5 |
 | 데모 | `DemoPanel` · `DemoBadge` | 3 | 클라이언트 | 5 |
 
@@ -65,7 +65,7 @@
 - **상태:** 열림, 닫힘, 여는 중(애니메이션), 내용이 길어 스크롤.
 - **토큰:** `bg-surface`, `rounded-sheet`(위쪽만), `handle`, `backdrop`, `shadow-sheet`.
 - **접근성:** 모달형은 `role="dialog"` + `aria-modal` + 제목 연결, 열리면 시트 안으로 포커스, Esc와 닫기로 닫고 연 버튼으로 포커스를 돌려준다. 움직임 줄이기면 애니메이션 없이 바로 열린다.
-- **로직:** 어떤 시트가 열렸는지는 주소 해시나 상태로 둔다(뒤로 가기로 닫히게 할지는 3주차에 정한다).
+- **로직:** 어떤 시트가 열렸는지는 주소 해시나 상태로 둔다(뒤로 가기로 닫히게 할지는 구현 때 정한다).
 - **스토리:** 고정형, 모달형(짧은 내용/긴 내용).
 
 ## 지도
@@ -83,7 +83,7 @@
 - **접근성:** 지도 캔버스는 화면 낭독기에 숨기고, 위치는 `SantaLocationBanner`의 `aria-live` 문장으로 알린다(CLAUDE.md). 지도 조작 버튼이 있으면 모두 44px.
 - **로직:** `santaAt`, `useClock`(프레임 보간), `maplibre-gl` 동적 import(첫 화면 번들에 넣지 않는다), `setWorkerUrl`, 지도 밝기(`useMapTone`).
 - **스토리:** 밤/낮 타일, 윤곽 지도, 지도 없음, 데모 시각 고정(`?demo=` 대신 시계를 고정하는 decorator).
-- **확인:** 3주차 끝에 실제 저사양 폰으로 FPS 측정(1주차에 남긴 일).
+- **확인:** 4주차 끝(12/6)까지 실제 저사양 폰으로 FPS 측정(1주차에 남긴 일, 12/14 베타 전).
 
 ### MapAttribution
 - **역할:** 지도 위 짧은 출처. 타일 지도는 "© OpenFreeMap © OpenMapTiles © OpenStreetMap", 윤곽 지도는 "Made with Natural Earth".
@@ -165,25 +165,25 @@
 
 | 이름 | 위치 | 내용 | 주차 |
 |---|---|---|---|
-| `formatRemaining` | `src/lib/santa/` | 남은 시간 표기("37일 2시간", "27분", "1분 이내") | 3 |
-| `formatKstTime` | `src/lib/santa/` | 한국 시각 표기("밤 12시 32분", "새벽 1시 14분") | 3 |
-| `describeSanta` | `src/lib/santa/` | 위치 문장("○○ 상공", "A에서 B로 가는 중") | 3 |
-| `nearbyStops` | `src/lib/santa/` | 도착 순서 목록에 보일 앞뒤 도시 | 3 |
-| `journeyProgress` | `src/lib/santa/` | 전체 여정 진행률 | 3 |
-| `sunTimes` | `src/lib/santa/` | 위도·경도·날짜로 해 뜨고 지는 시각(낮/밤 지도) | 3 |
-| `matchChosung` | `src/lib/` (새 폴더 또는 santa 옆) | 초성 검색 | 3 |
-| `nearestSigungu` | `src/lib/santa/` | 위치에서 가장 가까운 시군구 | 3 |
-| `useHome` | `src/hooks/` | 고른 동네(localStorage) | 3 |
-| `useSettings` | `src/hooks/` | 설정(localStorage) + `<html>` 속성 반영 | 3 |
-| `useMapTone` | `src/hooks/` | 설정 "자동"이면 `sunTimes`로 낮/밤 결정 | 3 |
+| `formatRemaining` | `src/lib/santa/` | 남은 시간 표기("37일 2시간", "27분", "1분 이내") | 3~4 |
+| `formatKstTime` | `src/lib/santa/` | 한국 시각 표기("밤 12시 32분", "새벽 1시 14분") | 3~4 |
+| `describeSanta` | `src/lib/santa/` | 위치 문장("○○ 상공", "A에서 B로 가는 중") | 3~4 |
+| `nearbyStops` | `src/lib/santa/` | 도착 순서 목록에 보일 앞뒤 도시 | 3~4 |
+| `journeyProgress` | `src/lib/santa/` | 전체 여정 진행률 | 3~4 |
+| `sunTimes` | `src/lib/santa/` | 위도·경도·날짜로 해 뜨고 지는 시각(낮/밤 지도) | 3~4 |
+| `matchChosung` | `src/lib/` (새 폴더 또는 santa 옆) | 초성 검색 | 3~4 |
+| `nearestSigungu` | `src/lib/santa/` | 위치에서 가장 가까운 시군구 | 3~4 |
+| `useHome` | `src/hooks/` | 고른 동네(localStorage) | 3~4 |
+| `useSettings` | `src/hooks/` | 설정(localStorage) + `<html>` 속성 반영 | 3~4 |
+| `useMapTone` | `src/hooks/` | 설정 "자동"이면 `sunTimes`로 낮/밤 결정 | 3~4 |
 
 `src/lib/`는 순수 함수만(CLAUDE.md) — 시각은 인자로 받는다. 위 함수마다 테스트를 같은 커밋에 넣는다.
 
-## 3주차 만드는 순서 (제안)
+## 3~4주차 만드는 순서 (11/23~12/6, 제안)
 
 1. **로직과 기본 요소:** `formatRemaining`·`formatKstTime`·`describeSanta`·`journeyProgress` + `Button`·`IconButton`·`BottomSheet`
 2. **메인 글자 화면:** `SantaLocationBanner`·`CountdownCard`·`JourneyProgress`로 `SantaStatus` 대체. 지도 없이도 완성된 첫 화면(LCP 목표의 핵심)
-3. **경로 데이터 생성 스크립트:** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 3주차 항목)
+3. **경로 데이터 생성 스크립트:** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
 4. **지도:** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
 5. **시트:** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestSigungu`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)
 6. **E2E:** Playwright로 시계를 고정해 이브 밤 흐름 확인(CLAUDE.md: 3주차부터)
