@@ -82,3 +82,13 @@ MapLibre 스타일은 JS에서 색을 받으므로, 3주차 지도 구현 때 �
 | `--size-touch` | `h-touch`, `w-touch` | 44px (누르는 곳 최소) |
 | `--size-button` | `h-button` | 52px |
 | `--shadow-float` / `--shadow-sheet` | `shadow-float` / `shadow-sheet` | 떠 있는 버튼 / 바텀시트 |
+
+## Storybook
+
+`npm run storybook`(http://localhost:6006)으로 토큰과 컴포넌트를 본다. CI는 `npm run build-storybook`으로 스토리가 깨지지 않았는지 확인한다.
+
+- **모드 툴바:** 위쪽 툴바의 "지도(밤/낮)", "글자(보통/큰 글씨)", "대비(보통/고대비)"는 앱과 같은 `<html>` 속성을 켠다(`.storybook/preview.tsx`). 움직임 줄이기는 기기 설정(`prefers-reduced-motion`)을 따르므로 툴바에 없다.
+- **접근성:** 아래 패널의 Accessibility 탭(axe)에 위반이 없어야 한다.
+- **스토리 위치:** 컴포넌트 스토리는 컴포넌트 옆(`src/components/X.stories.tsx`), 토큰처럼 컴포넌트가 아닌 문서는 `src/stories/`.
+- **글꼴:** 앱과 같은 `src/app/fonts.ts`를 쓴다.
+- **스토리 이름:** export 이름은 영어(`Seoul`), 화면에 보이는 이름은 `name`에 한국어로(`'서울'`).
