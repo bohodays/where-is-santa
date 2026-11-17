@@ -16,7 +16,9 @@
     "test:watch": "vitest",
     "preview:route": "node --experimental-strip-types --no-warnings scripts/build-preview.ts",
     "predev": "node scripts/copy-maplibre-worker.mjs",
-    "prebuild": "node scripts/copy-maplibre-worker.mjs"
+    "prebuild": "node scripts/copy-maplibre-worker.mjs",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "maplibre-gl": "6.16.0",
@@ -25,6 +27,9 @@
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "10.6.5",
+    "@storybook/addon-docs": "10.6.5",
+    "@storybook/nextjs-vite": "10.6.5",
     "@types/node": "22.20.5",
     "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
@@ -32,6 +37,7 @@
     "eslint": "8.57.1",
     "eslint-config-next": "15.5.29",
     "postcss": "8.5.32",
+    "storybook": "10.6.5",
     "tailwindcss": "3.4.17",
     "typescript": "5.7.2",
     "vitest": "5.1.0"
