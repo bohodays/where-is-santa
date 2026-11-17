@@ -28,6 +28,7 @@ AI 작업 규칙은 [`CLAUDE.md`](CLAUDE.md), 기획서는 [`docs/plan.md`](docs
     npm test             # 경로 로직 테스트
     npm run typecheck
     npm run lint
+    npm run storybook    # http://localhost:6006 디자인 토큰과 컴포넌트
 
 데모 모드: 아무 날짜에나 이브 밤을 볼 수 있다.
 
