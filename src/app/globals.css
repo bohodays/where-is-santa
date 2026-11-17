@@ -2,16 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 디자인 토큰 (화면 시안 기준 임시값, 2주차에 확정) */
+/*
+ * 디자인 토큰 (2026-11-17 확정, 화면 시안 "산타 어디쯤 화면 시안" 1안 기준. 설명은 docs/design-tokens.md)
+ * - 색은 역할 이름으로 쓴다. 바텀시트·버튼 등 화면은 낮/밤이 같고, 지도만 낮/밤 두 벌이다.
+ * - 대비는 src/app/tokens.test.ts가 검사한다 (본문 4.5:1, 큰 글자·그래픽 3:1, 고대비 모드 본문 7:1).
+ * - 모드는 <html>의 속성으로 켠다: data-map-tone="day", data-text-size="large", data-contrast="high"
+ */
 :root {
-  --color-night: #0b1830;
-  --color-ink: #13213d;
-  --color-ink-soft: #4a5875;
-  --color-surface: #ffffff;
-  --color-santa: #d6453b;
-  --color-gold: #f2c14e;
-  --font-display: 'Jua', 'IBM Plex Sans KR', sans-serif;
-  --font-sans: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  /* 바탕과 글자 */
+  --color-night: #0b1830; /* 앱 바탕 */
+  --color-surface: #ffffff; /* 바텀시트, 떠 있는 버튼 */
+  --color-surface-muted: #f3f6fb; /* 선택된 항목, 출처 상자 */
+  --color-ink: #13213d; /* 본문 */
+  --color-ink-soft: #4a5875; /* 보조 글자 */
+  --color-ink-faint: #5d6a85; /* 지나간 도시 */
+  --color-line: #e8ecf3; /* 구분선, 진행 막대 바탕 */
+  --color-border: #c9d1df; /* 보조 버튼·묶음 버튼 테두리 */
+  --color-handle: #d5dbe6; /* 시트 손잡이 */
+  --color-backdrop: rgb(5 10 22 / 0.55); /* 시트 뒤 어둡게 */
+
+  /* 강조 */
+  --color-santa: #d6453b; /* 산타 표시, 진행 막대. 그래픽 전용(글자 바탕으로 쓰지 않는다) */
+  --color-action: #c23a30; /* 주 버튼 바탕 */
+  --color-on-action: #ffffff; /* 주 버튼 글자 */
+  --color-now: #b8352b; /* "지금" 같은 강조 글자 */
+  --color-gold: #f2c14e; /* 밤 지도 경로 */
+  --color-highlight: #fff1cc; /* 우리 동네 행 바탕 */
+  --color-link: #2c5fb3;
+  --color-link-hover: #1d4384;
+  --color-switch-off: #7d889c; /* 꺼진 스위치 */
+
+  /* 지도: 밤이 기본 */
+  --map-sea: #0b1830;
+  --map-land: #1a2e52;
+  --map-land-line: #2b4675;
+  --map-route: #f2c14e;
+  --map-label: #c9d6ee; /* 도시 이름 */
+  --map-label-strong: #ffffff; /* 우리 동네 이름 */
+  --map-text: #dbe5f5; /* 지도 위 안내 글자("다음 도착") */
+  --map-attribution: #8ea3c7;
+
+  /* 글꼴: next/font가 --font-jua, --font-plex를 채운다(src/app/layout.tsx) */
+  --font-display: var(--font-jua), var(--font-plex), 'Apple SD Gothic Neo', sans-serif;
+  --font-sans: var(--font-plex), 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+
+  /* 글자 크기: rem이라 큰 글씨 모드에서 함께 커진다 */
+  --text-countdown: 3rem; /* 48px */
+  --text-title: 1.25rem; /* 20px */
+  --text-body-lg: 1rem; /* 16px, 버튼 */
+  --text-body: 0.9375rem; /* 15px */
+  --text-caption: 0.8125rem; /* 13px */
+  --text-fine: 0.75rem; /* 12px, 출처 상자 */
+  --text-map-label: 0.75rem; /* 12px */
+  --text-attribution: 0.625rem; /* 10px, 지도 위 출처 */
+
+  /* 모서리와 크기 */
+  --radius-sheet: 24px;
+  --radius-card: 16px;
+  --radius-button: 14px;
+  --radius-input: 12px;
+  --radius-pill: 999px;
+  --size-touch: 44px; /* 누르는 곳 최소 크기 */
+  --size-button: 52px; /* 주·보조 버튼 높이 */
+  --shadow-float: 0 2px 10px rgb(0 0 0 / 0.25);
+  --shadow-sheet: 0 -2px 16px rgb(0 0 0 / 0.1);
+}
+
+/* 낮 지도: 지도 색만 바뀐다. 해 뜬 뒤~해 지기 전(우리 동네 기준)이거나 설정에서 "밝게" */
+[data-map-tone='day'] {
+  --map-sea: #d9e6e6;
+  --map-land: #fbf7ee;
+  --map-land-line: #c9bfa9;
+  --map-route: #c23a30;
+  --map-label: #34413a;
+  --map-label-strong: #13213d;
+  --map-text: #13213d;
+  --map-attribution: #4f5b55;
+}
+
+/* 큰 글씨: rem 기준 글자를 모두 키운다 (16px → 18px) */
+html[data-text-size='large'] {
+  font-size: 112.5%;
+}
+
+/* 고대비: 보조 글자와 테두리를 진하게 */
+[data-contrast='high'] {
+  --color-ink-soft: #13213d;
+  --color-ink-faint: #2a3754;
+  --color-border: #4a5875;
+  --color-handle: #7d889c;
+  --color-switch-off: #4a5875;
+  --map-label: #ffffff;
+  --map-text: #ffffff;
+  --map-attribution: #c9d6ee;
+}
+
+[data-contrast='high'][data-map-tone='day'] {
+  --map-label: #13213d;
+  --map-text: #13213d;
+  --map-attribution: #22302a;
 }
 
 html,
