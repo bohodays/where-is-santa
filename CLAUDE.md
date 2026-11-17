@@ -17,6 +17,9 @@ AI(Claude Code 등)가 이 저장소에서 작업할 때 반드시 따르는 규
   - 첫 화면은 글자(카운트다운)를 먼저 보여주고 지도는 나중에 불러온다. 지도 JS를 첫 화면 번들에 넣지 않는다
   - 지도는 없어도 서비스가 돌아가야 한다. OpenFreeMap 스타일·타일이 실패하거나 응답이 없으면 자체 윤곽 지도(Natural Earth, `public/maps/`)로 바꾸고, 지도 JS를 못 불러오면 글자만 보여준다. 근거는 `docs/spike-map-fallback.md`
 - 테스트: Vitest(로직), Playwright(E2E, 3주차부터)
+- 디자인 시스템: Storybook(`@storybook/nextjs-vite`, 개발 의존성만, 버전 고정). 토큰은 `docs/design-tokens.md`
+  - 컴포넌트를 만들면 같은 PR에서 스토리(`*.stories.tsx`, 컴포넌트 옆)를 추가하고, 툴바의 모드(낮/밤 지도·큰 글씨·고대비)에서 모두 확인한다
+  - 접근성 패널(axe)에 위반이 없어야 한다
 - 새 의존성이 필요하면 코드를 쓰기 전에 이유와 대안을 먼저 제안하고 승인을 받는다.
 
 ## 폴더 구조
