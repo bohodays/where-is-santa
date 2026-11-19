@@ -1,9 +1,9 @@
-import type { Stop } from './route';
+import type { Stop } from "./route";
 
 export const DWELL_MS = 30_000; // 도시마다 머무는 시간
 
 export type SantaState = {
-  status: 'before' | 'visiting' | 'flying' | 'after';
+  status: "before" | "visiting" | "flying" | "after";
   lat: number;
   lon: number;
   prev: Stop | null; // 마지막으로 도착한 도시
@@ -23,15 +23,29 @@ export function greatCircle(
   t: number,
 ): { lat: number; lon: number } {
   const [φ1, λ1, φ2, λ2] = [rad(a.lat), rad(a.lon), rad(b.lat), rad(b.lon)];
-  const v1 = [Math.cos(φ1) * Math.cos(λ1), Math.cos(φ1) * Math.sin(λ1), Math.sin(φ1)];
-  const v2 = [Math.cos(φ2) * Math.cos(λ2), Math.cos(φ2) * Math.sin(λ2), Math.sin(φ2)];
-  const dot = Math.min(1, Math.max(-1, v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]));
+  const v1 = [
+    Math.cos(φ1) * Math.cos(λ1),
+    Math.cos(φ1) * Math.sin(λ1),
+    Math.sin(φ1),
+  ];
+  const v2 = [
+    Math.cos(φ2) * Math.cos(λ2),
+    Math.cos(φ2) * Math.sin(λ2),
+    Math.sin(φ2),
+  ];
+  const dot = Math.min(
+    1,
+    Math.max(-1, v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]),
+  );
   const ω = Math.acos(dot);
   if (ω < 1e-9) return { lat: a.lat, lon: a.lon };
   const s1 = Math.sin((1 - t) * ω) / Math.sin(ω);
   const s2 = Math.sin(t * ω) / Math.sin(ω);
   const [x, y, z] = [0, 1, 2].map((i) => s1 * v1[i] + s2 * v2[i]);
-  return { lat: deg(Math.atan2(z, Math.hypot(x, y))), lon: deg(Math.atan2(y, x)) };
+  return {
+    lat: deg(Math.atan2(z, Math.hypot(x, y))),
+    lon: deg(Math.atan2(y, x)),
+  };
 }
 
 /** 도착 시각 ≤ now 인 마지막 도시의 인덱스 (없으면 -1). 이진 탐색 */
@@ -56,7 +70,14 @@ export function santaAt(now: number, route: Stop[]): SantaState {
   const last = route[route.length - 1];
 
   if (i === -1) {
-    return { status: 'before', ...NORTH_POLE, prev: null, next: first, progress: 0, visitedCount: 0 };
+    return {
+      status: "before",
+      ...NORTH_POLE,
+      prev: null,
+      next: first,
+      progress: 0,
+      visitedCount: 0,
+    };
   }
 
   const prev = route[i];
@@ -66,7 +87,7 @@ export function santaAt(now: number, route: Stop[]): SantaState {
   if (!next) {
     const visiting = now < last.arriveUtc + DWELL_MS;
     return {
-      status: visiting ? 'visiting' : 'after',
+      status: visiting ? "visiting" : "after",
       lat: visiting ? last.lat : NORTH_POLE.lat,
       lon: visiting ? last.lon : NORTH_POLE.lon,
       prev,
@@ -82,12 +103,20 @@ export function santaAt(now: number, route: Stop[]): SantaState {
   const departAt = prev.arriveUtc + dwell;
 
   if (now < departAt) {
-    return { status: 'visiting', lat: prev.lat, lon: prev.lon, prev, next, progress: 0, visitedCount };
+    return {
+      status: "visiting",
+      lat: prev.lat,
+      lon: prev.lon,
+      prev,
+      next,
+      progress: 0,
+      visitedCount,
+    };
   }
 
   const progress = (now - departAt) / (next.arriveUtc - departAt);
   const pos = greatCircle(prev, next, progress);
-  return { status: 'flying', ...pos, prev, next, progress, visitedCount };
+  return { status: "flying", ...pos, prev, next, progress, visitedCount };
 }
 
 /** 특정 도시 도착까지 남은 시간(ms). 이미 지났으면 0 */
@@ -95,4 +124,15 @@ export function timeUntil(cityId: string, now: number, route: Stop[]): number {
   const stop = route.find((s) => s.id === cityId);
   if (!stop) throw new Error(`경로에 없는 도시: ${cityId}`);
   return Math.max(0, stop.arriveUtc - now);
+}
+
+/** 전체 여정 진행률 0~1. 첫 도착이 0, 마지막 도착이 1 */
+export function journeyProgress(now: number, route: Stop[]): number {
+  if (route.length === 0) return 0;
+  const start = route[0].arriveUtc;
+  const end = route[route.length - 1].arriveUtc;
+  if (start === end) return now < start ? 0 : 1; // 도시가 하나뿐이면 도착 전 0, 도착 뒤 1
+  if (now <= start) return 0;
+  if (now >= end) return 1;
+  return (now - start) / (end - start);
 }
