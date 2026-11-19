@@ -1,4 +1,4 @@
-import type { City } from './cities';
+import type { City } from "./cities";
 
 export type Stop = City & {
   effLon: number; // 날짜변경선을 보정한 경도

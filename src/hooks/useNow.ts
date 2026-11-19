@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   clockNow,
   estimateClockOffset,
   parseClockConfig,
   withOffset,
   type ClockConfig,
-} from '@/lib/santa/clock';
+} from "@/lib/santa/clock";
 
 /*
  * 화면에서 쓰는 "현재 시각". 페이지 안에서 시계 하나를 같이 쓴다.
@@ -22,7 +22,7 @@ const listeners = new Set<() => void>();
 function getConfig(): ClockConfig {
   if (config === null) {
     config = parseClockConfig(window.location.search, Date.now());
-    if (config.mode === 'real') void syncWithServer();
+    if (config.mode === "real") void syncWithServer();
   }
   return config;
 }
@@ -30,11 +30,11 @@ function getConfig(): ClockConfig {
 async function syncWithServer(): Promise<void> {
   const sentAt = Date.now();
   try {
-    const response = await fetch(window.location.pathname, { method: 'HEAD', cache: 'no-store' });
+    const response = await fetch(window.location.pathname, { method: "HEAD", cache: "no-store" });
     const offset = estimateClockOffset({
       sentAt,
       receivedAt: Date.now(),
-      serverDate: response.headers.get('date'),
+      serverDate: response.headers.get("date"),
     });
     if (offset === null || config === null) return;
     config = withOffset(config, offset);

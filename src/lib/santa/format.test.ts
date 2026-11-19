@@ -18,10 +18,7 @@ describe("formatRemaining: 남은 시간", () => {
   });
 
   test("하루 안이면 시간과 분", () => {
-    assert.equal(
-      formatRemaining(23 * HOUR + 59 * MIN + 59 * SEC),
-      "23시간 59분",
-    );
+    assert.equal(formatRemaining(23 * HOUR + 59 * MIN + 59 * SEC), "23시간 59분");
     assert.equal(formatRemaining(3 * HOUR + 12 * MIN + 30 * SEC), "3시간 12분");
     assert.equal(formatRemaining(1 * HOUR), "1시간");
   });
@@ -60,39 +57,21 @@ describe("formatKstTime: 한국 시각", () => {
 
   test('기준 시각을 주면 "내일"·"어제"를 붙인다', () => {
     const eveEvening = kst(12, 24, 20, 0);
-    assert.equal(
-      formatKstTime(kst(12, 25, 20, 22), eveEvening),
-      "내일 밤 8시 22분",
-    ); // 산타 여정 끝
-    assert.equal(
-      formatKstTime(kst(12, 24, 23, 41), kst(12, 25, 10, 0)),
-      "어제 밤 11시 41분",
-    );
+    assert.equal(formatKstTime(kst(12, 25, 20, 22), eveEvening), "내일 밤 8시 22분"); // 산타 여정 끝
+    assert.equal(formatKstTime(kst(12, 24, 23, 41), kst(12, 25, 10, 0)), "어제 밤 11시 41분");
   });
 
   test('새벽 5시 전은 전날 밤으로 본다 ("오늘 밤 12시 32분"을 "내일"이라 하지 않는다)', () => {
     const eveEvening = kst(12, 24, 20, 0);
     assert.equal(formatKstTime(kst(12, 25, 0, 32), eveEvening), "밤 12시 32분");
-    assert.equal(
-      formatKstTime(kst(12, 25, 4, 59), eveEvening),
-      "새벽 4시 59분",
-    );
+    assert.equal(formatKstTime(kst(12, 25, 4, 59), eveEvening), "새벽 4시 59분");
     assert.equal(formatKstTime(kst(12, 25, 5, 0), eveEvening), "내일 새벽 5시"); // 5시부터는 다음 날, 이름은 "새벽"
-    assert.equal(
-      formatKstTime(kst(12, 24, 23, 41), kst(12, 25, 1, 0)),
-      "밤 11시 41분",
-    );
+    assert.equal(formatKstTime(kst(12, 24, 23, 41), kst(12, 25, 1, 0)), "밤 11시 41분");
   });
 
   test("이틀 이상 떨어지면 날짜를 쓴다 (날짜는 실제 달력 날짜)", () => {
-    assert.equal(
-      formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21, 0)),
-      "12월 25일 밤 12시 32분",
-    );
-    assert.equal(
-      formatKstTime(kst(12, 24, 19, 29), kst(11, 19, 21, 0)),
-      "12월 24일 밤 7시 29분",
-    );
+    assert.equal(formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21, 0)), "12월 25일 밤 12시 32분");
+    assert.equal(formatKstTime(kst(12, 24, 19, 29), kst(11, 19, 21, 0)), "12월 24일 밤 7시 29분");
   });
 
   test('showZone이면 맨 앞에 "한국 시각"을 붙인다', () => {

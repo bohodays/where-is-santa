@@ -92,10 +92,7 @@ function TokenPage() {
         <h2 className="text-title font-bold">글자 크기 (툴바: 큰 글씨)</h2>
         <ul className="flex flex-col gap-3">
           {TEXT_SIZES.map(({ className, token, sample }) => (
-            <li
-              key={token}
-              className="flex flex-col gap-1 border-b border-line pb-3"
-            >
+            <li key={token} className="flex flex-col gap-1 border-b border-line pb-3">
               <span className={className}>{sample}</span>
               <code className="text-fine text-ink-soft">text-{token}</code>
             </li>
@@ -147,10 +144,7 @@ export const MapTones: StoryObj<typeof meta> = {
           className="flex w-[240px] flex-col gap-2 rounded-card p-4"
           style={{ background: "var(--map-sea)" }}
         >
-          <span
-            className="text-map-label"
-            style={{ color: "var(--map-label)" }}
-          >
+          <span className="text-map-label" style={{ color: "var(--map-label)" }}>
             {tone === "day" ? "낮 지도" : "밤 지도"} · 부산
           </span>
           <span
@@ -162,17 +156,11 @@ export const MapTones: StoryObj<typeof meta> = {
           >
             서울 마포구 (우리 동네)
           </span>
-          <span
-            className="h-1 rounded-pill"
-            style={{ background: "var(--map-route)" }}
-          />
+          <span className="h-1 rounded-pill" style={{ background: "var(--map-route)" }} />
           <span className="text-caption" style={{ color: "var(--map-text)" }}>
             다음 도착: 부산, 19분 뒤
           </span>
-          <span
-            className="text-attribution"
-            style={{ color: "var(--map-attribution)" }}
-          >
+          <span className="text-attribution" style={{ color: "var(--map-attribution)" }}>
             © OpenFreeMap © OpenMapTiles © OpenStreetMap
           </span>
         </div>

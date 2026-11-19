@@ -1,0 +1,9 @@
+# 자동 생성 파일, 그리고 스크립트가 글자를 끼워 넣는 HTML 틀
+src/lib/santa/sigungu.ts
+scripts/preview.template.html
+public/
+
+# 문서는 손으로 정리한다 (docs/plan.md는 Claude Docs 원본의 사본)
+*.md
+
+package-lock.json

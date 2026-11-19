@@ -1,25 +1,31 @@
 // 디자인 토큰 검사: globals.css의 색 조합이 WCAG 2.2 AA 대비를 지키는지, Tailwind가 없는 토큰을 가리키지 않는지.
 // 토큰 값을 바꿨는데 여기서 실패하면 기대값을 고치지 말고 색을 고친다(CLAUDE.md 테스트 규칙).
-import { test } from 'vitest';
-import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import tailwindConfig from '../../tailwind.config';
+import { test } from "vitest";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import tailwindConfig from "../../tailwind.config";
 
-const css = readFileSync(join(__dirname, 'globals.css'), 'utf8');
+const css = readFileSync(join(__dirname, "globals.css"), "utf8");
 
 /** 선택자 블록 안의 --이름: 값 을 읽는다 */
 function block(selector: string): Record<string, string> {
   const start = css.indexOf(`${selector} {`);
   assert.ok(start >= 0, `globals.css에 ${selector} 블록이 없음`);
-  const body = css.slice(start, css.indexOf('}', start));
-  return Object.fromEntries([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  const body = css.slice(start, css.indexOf("}", start));
+  return Object.fromEntries(
+    [...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]),
+  );
 }
 
-const root = block(':root');
-const day = { ...root, ...block("[data-map-tone='day']") };
-const high = { ...root, ...block("[data-contrast='high']") };
-const highDay = { ...day, ...block("[data-contrast='high']"), ...block("[data-contrast='high'][data-map-tone='day']") };
+const root = block(":root");
+const day = { ...root, ...block('[data-map-tone="day"]') };
+const high = { ...root, ...block('[data-contrast="high"]') };
+const highDay = {
+  ...day,
+  ...block('[data-contrast="high"]'),
+  ...block('[data-contrast="high"][data-map-tone="day"]'),
+};
 
 function luminance(hex: string): number {
   assert.match(hex, /^#[0-9a-f]{6}$/i, `6자리 hex 색이 아님: ${hex}`);
@@ -35,71 +41,84 @@ function contrast(a: string, b: string): number {
 function check(tokens: Record<string, string>, pairs: [string, string, number][], mode: string) {
   for (const [fg, bg, min] of pairs) {
     const ratio = contrast(tokens[fg], tokens[bg]);
-    assert.ok(ratio >= min, `${mode}: ${fg} ${tokens[fg]} / ${bg} ${tokens[bg]} = ${ratio.toFixed(2)}:1 (기준 ${min})`);
+    assert.ok(
+      ratio >= min,
+      `${mode}: ${fg} ${tokens[fg]} / ${bg} ${tokens[bg]} = ${ratio.toFixed(2)}:1 (기준 ${min})`,
+    );
   }
 }
 
 const TEXT = 4.5; // 본문
 const GRAPHIC = 3; // 큰 글자, 아이콘, 스위치 같은 그래픽
 
-test('화면(바텀시트·버튼) 글자 대비는 4.5:1 이상', () => {
+test("화면(바텀시트·버튼) 글자 대비는 4.5:1 이상", () => {
   check(
     root,
     [
-      ['--color-ink', '--color-surface', TEXT],
-      ['--color-ink-soft', '--color-surface', TEXT],
-      ['--color-ink-soft', '--color-surface-muted', TEXT],
-      ['--color-ink-faint', '--color-surface', TEXT],
-      ['--color-link', '--color-surface', TEXT],
-      ['--color-link', '--color-surface-muted', TEXT],
-      ['--color-on-action', '--color-action', TEXT],
-      ['--color-now', '--color-surface', TEXT],
-      ['--color-ink', '--color-highlight', TEXT],
+      ["--color-ink", "--color-surface", TEXT],
+      ["--color-ink-soft", "--color-surface", TEXT],
+      ["--color-ink-soft", "--color-surface-muted", TEXT],
+      ["--color-ink-faint", "--color-surface", TEXT],
+      ["--color-link", "--color-surface", TEXT],
+      ["--color-link", "--color-surface-muted", TEXT],
+      ["--color-on-action", "--color-action", TEXT],
+      ["--color-now", "--color-surface", TEXT],
+      ["--color-ink", "--color-highlight", TEXT],
     ],
-    '기본',
+    "기본",
   );
 });
 
-test('그래픽(진행 막대, 꺼진 스위치)은 3:1 이상', () => {
+test("그래픽(진행 막대, 꺼진 스위치)은 3:1 이상", () => {
   check(
     root,
     [
-      ['--color-santa', '--color-line', GRAPHIC],
-      ['--color-switch-off', '--color-surface', GRAPHIC],
-      ['--color-ink', '--color-surface', GRAPHIC], // 켜진 스위치
+      ["--color-santa", "--color-line", GRAPHIC],
+      ["--color-switch-off", "--color-surface", GRAPHIC],
+      ["--color-ink", "--color-surface", GRAPHIC], // 켜진 스위치
     ],
-    '기본',
+    "기본",
   );
 });
 
 const MAP_PAIRS: [string, string, number][] = [
-  ['--map-label', '--map-sea', TEXT],
-  ['--map-label', '--map-land', TEXT],
-  ['--map-label-strong', '--map-land', TEXT],
-  ['--map-text', '--map-sea', TEXT],
-  ['--map-text', '--map-land', TEXT],
-  ['--map-attribution', '--map-sea', TEXT],
-  ['--map-route', '--map-sea', GRAPHIC],
-  ['--map-route', '--map-land', GRAPHIC],
+  ["--map-label", "--map-sea", TEXT],
+  ["--map-label", "--map-land", TEXT],
+  ["--map-label-strong", "--map-land", TEXT],
+  ["--map-text", "--map-sea", TEXT],
+  ["--map-text", "--map-land", TEXT],
+  ["--map-attribution", "--map-sea", TEXT],
+  ["--map-route", "--map-sea", GRAPHIC],
+  ["--map-route", "--map-land", GRAPHIC],
 ];
 
-test('밤 지도 글자와 경로가 바다·육지 위에서 읽힌다', () => check(root, MAP_PAIRS, '밤 지도'));
-test('낮 지도 글자와 경로가 바다·육지 위에서 읽힌다', () => check(day, MAP_PAIRS, '낮 지도'));
+test("밤 지도 글자와 경로가 바다·육지 위에서 읽힌다", () => check(root, MAP_PAIRS, "밤 지도"));
+test("낮 지도 글자와 경로가 바다·육지 위에서 읽힌다", () => check(day, MAP_PAIRS, "낮 지도"));
 
-test('고대비 모드는 보조 글자도 7:1 이상', () => {
+test("고대비 모드는 보조 글자도 7:1 이상", () => {
   const pairs: [string, string, number][] = [
-    ['--color-ink-soft', '--color-surface', 7],
-    ['--color-ink-soft', '--color-surface-muted', 7],
-    ['--color-ink-faint', '--color-surface', 7],
-    ['--color-switch-off', '--color-surface', 4.5],
+    ["--color-ink-soft", "--color-surface", 7],
+    ["--color-ink-soft", "--color-surface-muted", 7],
+    ["--color-ink-faint", "--color-surface", 7],
+    ["--color-switch-off", "--color-surface", 4.5],
   ];
-  check(high, pairs, '고대비');
-  check(high, MAP_PAIRS.map(([f, b, m]) => [f, b, m === TEXT ? 7 : m]), '고대비 밤 지도');
-  check(highDay, MAP_PAIRS.map(([f, b, m]) => [f, b, m === TEXT ? 7 : m]), '고대비 낮 지도');
+  check(high, pairs, "고대비");
+  check(
+    high,
+    MAP_PAIRS.map(([f, b, m]) => [f, b, m === TEXT ? 7 : m]),
+    "고대비 밤 지도",
+  );
+  check(
+    highDay,
+    MAP_PAIRS.map(([f, b, m]) => [f, b, m === TEXT ? 7 : m]),
+    "고대비 낮 지도",
+  );
 });
 
-test('Tailwind 설정이 가리키는 CSS 변수는 모두 globals.css에 있다', () => {
-  const used = [...JSON.stringify(tailwindConfig.theme).matchAll(/var\((--[\w-]+)\)/g)].map((m) => m[1]);
+test("Tailwind 설정이 가리키는 CSS 변수는 모두 globals.css에 있다", () => {
+  const used = [...JSON.stringify(tailwindConfig.theme).matchAll(/var\((--[\w-]+)\)/g)].map(
+    (m) => m[1],
+  );
   assert.ok(used.length > 30, `찾은 변수 ${used.length}개`);
   for (const name of used) assert.ok(name in root, `globals.css에 없는 토큰: ${name}`);
 });
