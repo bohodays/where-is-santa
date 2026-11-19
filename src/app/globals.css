@@ -116,6 +116,58 @@ html[data-text-size="large"] {
     outline-offset: 2px;
     box-shadow: 0 0 0 2px var(--color-focus-halo);
   }
+
+  /*
+   * 모달 바텀시트(ModalSheet). <dialog>의 기본 모양(가운데 상자, 테두리)을 지우고 화면 아래에 붙인다.
+   * 위쪽 96px은 지도가 보이게 남긴다(시안 "도착 순서"). 내용이 짧으면 내용 높이만큼만 올라온다.
+   */
+  .modal-sheet {
+    position: fixed;
+    inset: auto 0 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 28rem; /* 메인 화면 폭(max-w-md)과 같게 */
+    max-height: calc(100vh - 96px);
+    max-height: calc(
+      100dvh - 96px
+    ); /* dvh: 주소창이 접혔다 펴져도 맞는 높이. 모르는 브라우저는 윗줄 vh를 쓴다 */
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-sheet);
+    transform: translateY(100%);
+    transition: transform 0.25s ease-out;
+    /* 닫힐 때도 내려가는 애니메이션이 보이게(지원하는 브라우저만). 모르는 브라우저는 윗줄을 쓰고 바로 사라진다 */
+    transition:
+      transform 0.25s ease-out,
+      overlay 0.25s allow-discrete,
+      display 0.25s allow-discrete;
+  }
+
+  .modal-sheet[open] {
+    transform: translateY(0);
+  }
+
+  /* 열리는 첫 순간의 모양. 여기서 [open] 모양으로 미끄러져 올라온다. 움직임 줄이기면 아래 규칙이 시간을 0에 가깝게 만든다 */
+  @starting-style {
+    .modal-sheet[open] {
+      transform: translateY(100%);
+    }
+  }
+
+  .modal-sheet::backdrop {
+    background: rgb(
+      5 10 22 / 0.55
+    ); /* 옛 브라우저는 ::backdrop에서 CSS 변수를 못 읽어서 같은 값을 먼저 적는다 */
+    background: var(--color-backdrop);
+  }
+
+  /* 시트가 열려 있는 동안 뒤 화면이 스크롤되지 않게 */
+  html:has(.modal-sheet[open]) {
+    overflow: hidden;
+  }
 }
 
 html,
