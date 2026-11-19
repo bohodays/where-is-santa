@@ -81,6 +81,28 @@ test("그래픽(진행 막대, 꺼진 스위치)은 3:1 이상", () => {
   );
 });
 
+test("키보드 포커스 링은 어느 바탕에서나 3:1 이상으로 보인다", () => {
+  // 링은 흰 띠와 파란 링 두 겹이다. 둘 중 하나라도 바탕과 3:1 이상이면 보인다.
+  const backgrounds: [Record<string, string>, string, string][] = [
+    [root, "--color-surface", "시트"],
+    [root, "--color-surface-muted", "선택된 항목"],
+    [root, "--color-action", "주 버튼"],
+    [root, "--color-night", "앱 바탕"],
+    [root, "--map-sea", "밤 지도 바다"],
+    [root, "--map-land", "밤 지도 육지"],
+    [day, "--map-sea", "낮 지도 바다"],
+    [day, "--map-land", "낮 지도 육지"],
+  ];
+  for (const [tokens, bg, where] of backgrounds) {
+    const ring = contrast(tokens["--color-focus"], tokens[bg]);
+    const halo = contrast(tokens["--color-focus-halo"], tokens[bg]);
+    assert.ok(
+      Math.max(ring, halo) >= GRAPHIC,
+      `${where}: 링 ${ring.toFixed(2)}:1, 흰 띠 ${halo.toFixed(2)}:1 (기준 ${GRAPHIC})`,
+    );
+  }
+});
+
 const MAP_PAIRS: [string, string, number][] = [
   ["--map-label", "--map-sea", TEXT],
   ["--map-label", "--map-land", TEXT],

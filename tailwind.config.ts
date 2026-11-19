@@ -26,6 +26,8 @@ const config: Config = {
         link: "var(--color-link)",
         "link-hover": "var(--color-link-hover)",
         "switch-off": "var(--color-switch-off)",
+        focus: "var(--color-focus)",
+        "focus-halo": "var(--color-focus-halo)",
         map: {
           sea: "var(--map-sea)",
           land: "var(--map-land)",
