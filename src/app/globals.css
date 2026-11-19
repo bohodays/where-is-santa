@@ -43,8 +43,8 @@
   --map-attribution: #8ea3c7;
 
   /* 글꼴: next/font가 --font-jua, --font-plex를 채운다(src/app/layout.tsx) */
-  --font-display: var(--font-jua), var(--font-plex), 'Apple SD Gothic Neo', sans-serif;
-  --font-sans: var(--font-plex), 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --font-display: var(--font-jua), var(--font-plex), "Apple SD Gothic Neo", sans-serif;
+  --font-sans: var(--font-plex), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 
   /* 글자 크기: rem이라 큰 글씨 모드에서 함께 커진다 */
   --text-countdown: 3rem; /* 48px */
@@ -69,7 +69,7 @@
 }
 
 /* 낮 지도: 지도 색만 바뀐다. 해 뜬 뒤~해 지기 전(우리 동네 기준)이거나 설정에서 "밝게" */
-[data-map-tone='day'] {
+[data-map-tone="day"] {
   --map-sea: #d9e6e6;
   --map-land: #fbf7ee;
   --map-land-line: #c9bfa9;
@@ -81,12 +81,12 @@
 }
 
 /* 큰 글씨: rem 기준 글자를 모두 키운다 (16px → 18px) */
-html[data-text-size='large'] {
+html[data-text-size="large"] {
   font-size: 112.5%;
 }
 
 /* 고대비: 보조 글자와 테두리를 진하게 */
-[data-contrast='high'] {
+[data-contrast="high"] {
   --color-ink-soft: #13213d;
   --color-ink-faint: #2a3754;
   --color-border: #4a5875;
@@ -97,7 +97,7 @@ html[data-text-size='large'] {
   --map-attribution: #c9d6ee;
 }
 
-[data-contrast='high'][data-map-tone='day'] {
+[data-contrast="high"][data-map-tone="day"] {
   --map-label: #13213d;
   --map-text: #13213d;
   --map-attribution: #22302a;

@@ -11,8 +11,7 @@ const withModes: Decorator = (Story, context) => {
     html.lang = "ko";
     html.classList.add(...fontVariables.split(" "));
     const set = (name: string, value: unknown, off: string) => {
-      if (typeof value === "string" && value !== off)
-        html.setAttribute(name, value);
+      if (typeof value === "string" && value !== off) html.setAttribute(name, value);
       else html.removeAttribute(name);
     };
     set("data-map-tone", mapTone, "night");

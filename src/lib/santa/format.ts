@@ -21,8 +21,7 @@ export function formatRemaining(ms: number): string {
   const minutes = Math.floor((ms % HOUR) / MIN);
 
   if (days > 0) return hours > 0 ? `${days}일 ${hours}시간` : `${days}일`;
-  if (hours > 0)
-    return minutes > 0 ? `${hours}시간 ${minutes}분` : `${hours}시간`;
+  if (hours > 0) return minutes > 0 ? `${hours}시간 ${minutes}분` : `${hours}시간`;
   return `${minutes}분`;
 }
 
@@ -84,7 +83,10 @@ export function needsKstLabel(timeZone: string | undefined, at: number): boolean
   if (!timeZone) return true;
   try {
     const device = new Intl.DateTimeFormat("en-US", { ...CLOCK_PARTS, timeZone }).format(at);
-    const korea = new Intl.DateTimeFormat("en-US", { ...CLOCK_PARTS, timeZone: "Asia/Seoul" }).format(at);
+    const korea = new Intl.DateTimeFormat("en-US", {
+      ...CLOCK_PARTS,
+      timeZone: "Asia/Seoul",
+    }).format(at);
     return device !== korea;
   } catch {
     return true; // 알 수 없는 시간대 이름(RangeError)

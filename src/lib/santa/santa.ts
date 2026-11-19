@@ -23,20 +23,9 @@ export function greatCircle(
   t: number,
 ): { lat: number; lon: number } {
   const [φ1, λ1, φ2, λ2] = [rad(a.lat), rad(a.lon), rad(b.lat), rad(b.lon)];
-  const v1 = [
-    Math.cos(φ1) * Math.cos(λ1),
-    Math.cos(φ1) * Math.sin(λ1),
-    Math.sin(φ1),
-  ];
-  const v2 = [
-    Math.cos(φ2) * Math.cos(λ2),
-    Math.cos(φ2) * Math.sin(λ2),
-    Math.sin(φ2),
-  ];
-  const dot = Math.min(
-    1,
-    Math.max(-1, v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]),
-  );
+  const v1 = [Math.cos(φ1) * Math.cos(λ1), Math.cos(φ1) * Math.sin(λ1), Math.sin(φ1)];
+  const v2 = [Math.cos(φ2) * Math.cos(λ2), Math.cos(φ2) * Math.sin(λ2), Math.sin(φ2)];
+  const dot = Math.min(1, Math.max(-1, v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]));
   const ω = Math.acos(dot);
   if (ω < 1e-9) return { lat: a.lat, lon: a.lon };
   const s1 = Math.sin((1 - t) * ω) / Math.sin(ω);

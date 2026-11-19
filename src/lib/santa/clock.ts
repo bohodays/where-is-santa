@@ -2,8 +2,8 @@
 // 기기 시각(realNow)과 서버 응답은 바깥(src/hooks/useNow.ts)에서 받아 넘긴다.
 
 export type ClockConfig =
-  | { mode: 'real'; offsetMs: number } // 기기 시각 + 보정값
-  | { mode: 'demo'; startAt: number; speed: number; realStartAt: number }; // 데모: startAt부터 배속으로
+  | { mode: "real"; offsetMs: number } // 기기 시각 + 보정값
+  | { mode: "demo"; startAt: number; speed: number; realStartAt: number }; // 데모: startAt부터 배속으로
 
 /** 이보다 작은 차이는 측정 오차(Date 헤더는 초 단위)로 보고 보정하지 않는다 */
 export const MIN_OFFSET_MS = 2_000;
@@ -17,13 +17,13 @@ export const MAX_ROUND_TRIP_MS = 5_000;
  */
 export function parseClockConfig(search: string, realNow: number): ClockConfig {
   const params = new URLSearchParams(search);
-  const demo = params.get('demo');
+  const demo = params.get("demo");
   const startAt = demo === null ? NaN : Date.parse(demo);
-  if (!Number.isFinite(startAt)) return { mode: 'real', offsetMs: 0 };
+  if (!Number.isFinite(startAt)) return { mode: "real", offsetMs: 0 };
 
-  const speed = Number(params.get('speed') ?? '1');
+  const speed = Number(params.get("speed") ?? "1");
   return {
-    mode: 'demo',
+    mode: "demo",
     startAt,
     speed: Number.isFinite(speed) && speed > 0 ? speed : 1,
     realStartAt: realNow,
@@ -32,13 +32,13 @@ export function parseClockConfig(search: string, realNow: number): ClockConfig {
 
 /** 기기 시각 realNow일 때 화면에서 쓸 시각(epoch ms) */
 export function clockNow(config: ClockConfig, realNow: number): number {
-  if (config.mode === 'real') return realNow + config.offsetMs;
+  if (config.mode === "real") return realNow + config.offsetMs;
   return config.startAt + (realNow - config.realStartAt) * config.speed;
 }
 
 /** 보정값을 적용한다. 데모 모드는 기기 시계와 상관없이 흐르므로 그대로 둔다 */
 export function withOffset(config: ClockConfig, offsetMs: number): ClockConfig {
-  return config.mode === 'real' ? { mode: 'real', offsetMs } : config;
+  return config.mode === "real" ? { mode: "real", offsetMs } : config;
 }
 
 /**
