@@ -182,7 +182,7 @@
 |---|---|---|---|
 | `formatRemaining` | `src/lib/santa/` | 남은 시간 표기("37일 2시간", "27분", "1분 이내") | 3~4 |
 | `formatKstTime` | `src/lib/santa/` | 한국 시각 표기("밤 12시 32분", "새벽 1시 14분") | 3~4 |
-| `describeSanta` | `src/lib/santa/` | 위치 문장("○○ 상공", "A에서 B로 가는 중") | 3~4 |
+| `describeSanta` | `src/lib/santa/` | 위치 문장("○○ 상공", "A에서 B로 가는 중"). 두 도시가 300km 이하면 "상공", 멀면 "가는 중" | 3~4 |
 | `nearbyStops` | `src/lib/santa/` | 도착 순서 목록에 보일 앞뒤 도시 | 3~4 |
 | `journeyProgress` | `src/lib/santa/` | 전체 여정 진행률 | 3~4 |
 | `sunTimes` | `src/lib/santa/` | 위도·경도·날짜로 해 뜨고 지는 시각(낮/밤 지도) | 3~4 |
