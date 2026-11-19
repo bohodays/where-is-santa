@@ -31,6 +31,8 @@
   --color-link: #2c5fb3;
   --color-link-hover: #1d4384;
   --color-switch-off: #7d889c; /* 꺼진 스위치 */
+  --color-focus: #2c5fb3; /* 키보드 포커스 링 */
+  --color-focus-halo: #ffffff; /* 포커스 링 안쪽 흰 띠. 어두운 바탕에서도 링이 보이게 */
 
   /* 지도: 밤이 기본 */
   --map-sea: #0b1830;
@@ -101,6 +103,19 @@ html[data-text-size="large"] {
   --map-label: #13213d;
   --map-text: #13213d;
   --map-attribution: #22302a;
+}
+
+@layer components {
+  /*
+   * 키보드 포커스 표시: 요소 | 흰 띠 2px | 파란 링 3px.
+   * 흰 바탕(시트)에서는 파란 링이, 어두운 바탕(앱·밤 지도)에서는 흰 띠가 보인다. 대비는 tokens.test.ts가 검사한다.
+   * :focus-visible이라 마우스·손가락으로 누를 때는 나오지 않고, 키보드로 옮겨 갈 때만 나온다.
+   */
+  .focus-ring:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-focus-halo);
+  }
 }
 
 html,

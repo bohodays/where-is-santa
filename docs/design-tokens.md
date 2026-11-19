@@ -40,8 +40,12 @@
 | `--color-highlight` | `highlight` | #fff1cc | 우리 동네 행 바탕 |
 | `--color-link` / `--color-link-hover` | `link` / `link-hover` | #2c5fb3 / #1d4384 | 글자 링크 |
 | `--color-switch-off` | `switch-off` | #7d889c | 꺼진 스위치(3.58:1) |
+| `--color-focus` | `focus` | #2c5fb3 | 키보드 포커스 링 |
+| `--color-focus-halo` | `focus-halo` | #ffffff | 포커스 링 안쪽 흰 띠 |
 
 `santa`(#d6453b)는 흰 글자와 4.40:1이라 글자 바탕으로 쓰지 않는다. 버튼은 `action`을 쓴다.
+
+**포커스 표시:** 누르는 요소에는 `focus-ring` 클래스(globals.css)를 붙인다. 키보드로 옮겨 갈 때만 `요소 | 흰 띠 2px | 파란 링 3px`이 나온다. 파란 링만으로는 앱 바탕(night)과 2.86:1이라 모자라서 흰 띠를 함께 둔다. 둘 중 하나가 바탕과 3:1 이상인지 토큰 테스트가 시트·주 버튼·앱 바탕·지도(낮/밤) 위에서 검사한다.
 
 ### 지도
 
@@ -80,7 +84,7 @@ MapLibre 스타일은 JS에서 색을 받으므로, 3주차 지도 구현 때 �
 |---|---|---|
 | `--radius-sheet` / `card` / `button` / `input` / `pill` | `rounded-sheet` 등 | 24 / 16 / 14 / 12 / 999px |
 | `--size-touch` | `h-touch`, `w-touch` | 44px (누르는 곳 최소) |
-| `--size-button` | `h-button` | 52px |
+| `--size-button` | `min-h-button` | 52px (큰 글씨에서 두 줄이 되면 늘어나게 min-h로 쓴다) |
 | `--shadow-float` / `--shadow-sheet` | `shadow-float` / `shadow-sheet` | 떠 있는 버튼 / 바텀시트 |
 
 ## Storybook
