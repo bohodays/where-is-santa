@@ -47,6 +47,21 @@
 
 **포커스 표시:** 누르는 요소에는 `focus-ring` 클래스(globals.css)를 붙인다. 키보드로 옮겨 갈 때만 `요소 | 흰 띠 2px | 파란 링 3px`이 나온다. 파란 링만으로는 앱 바탕(night)과 2.86:1이라 모자라서 흰 띠를 함께 둔다. 둘 중 하나가 바탕과 3:1 이상인지 토큰 테스트가 시트·주 버튼·앱 바탕·지도(낮/밤) 위에서 검사한다.
 
+### 북극 마을 그림
+
+출발 전·끝난 뒤 지도 자리에 나오는 `NorthPoleScene`의 색. **늘 밤 그림**이라 `--map-*`(낮/밤으로 바뀐다)을 쓰지 않고 따로 둔다. 낮 지도 모드에서도 그대로인지 토큰 테스트가 검사한다.
+
+| 토큰 | Tailwind | 값 | 쓰는 곳 |
+|---|---|---|---|
+| `--scene-ice` | `scene-ice` | #13284a | 얼음 땅 |
+| `--scene-ring` | `scene-ring` | #2b4675 | 위도 점선 |
+| `--scene-snow` | `scene-snow` | #e9eef7 | 눈 언덕 |
+| `--scene-house` | `scene-house` | #2c5fb3 | 파란 집 |
+| `--scene-text` | `scene-text` | #dbe5f5 | 그림 위 글자 |
+| `--scene-text-soft` | `scene-text-soft` | #c9d6ee | 그림 위 보조 글자 |
+
+바탕은 `night`, 남은 시간은 `gold`, 산타와 빨간 집은 `santa`, 지붕은 `surface`.
+
 ### 지도
 
 | 토큰 | Tailwind | 밤 | 낮 |

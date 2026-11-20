@@ -28,6 +28,14 @@ const config: Config = {
         "switch-off": "var(--color-switch-off)",
         focus: "var(--color-focus)",
         "focus-halo": "var(--color-focus-halo)",
+        scene: {
+          ice: "var(--scene-ice)",
+          ring: "var(--scene-ring)",
+          snow: "var(--scene-snow)",
+          house: "var(--scene-house)",
+          text: "var(--scene-text)",
+          "text-soft": "var(--scene-text-soft)",
+        },
         map: {
           sea: "var(--map-sea)",
           land: "var(--map-land)",

@@ -103,6 +103,21 @@ test("키보드 포커스 링은 어느 바탕에서나 3:1 이상으로 보인�
   }
 });
 
+test("북극 마을 그림 위 글자는 밤 바탕에서 읽히고, 낮 지도에서도 바뀌지 않는다", () => {
+  const pairs: [string, string, number][] = [
+    ["--scene-text", "--color-night", TEXT],
+    ["--scene-text-soft", "--color-night", TEXT],
+    ["--scene-text-soft", "--scene-ice", TEXT], // 그림 안 "북극 마을 · 선물 포장 중", 출발 시각
+    ["--color-gold", "--color-night", TEXT], // 큰 글자 남은 시간
+    // 작은 화면·큰 글씨에서는 위쪽 글자가 얼음 땅 위로 내려온다
+    ["--scene-text", "--scene-ice", TEXT],
+    ["--color-gold", "--scene-ice", TEXT],
+  ];
+  check(root, pairs, "북극 마을");
+  check(day, pairs, "북극 마을(낮 지도 모드)");
+  check(highDay, pairs, "북극 마을(고대비·낮 지도)");
+});
+
 const MAP_PAIRS: [string, string, number][] = [
   ["--map-label", "--map-sea", TEXT],
   ["--map-label", "--map-land", TEXT],

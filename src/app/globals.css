@@ -44,6 +44,14 @@
   --map-text: #dbe5f5; /* 지도 위 안내 글자("다음 도착") */
   --map-attribution: #8ea3c7;
 
+  /* 북극 마을 그림(NorthPoleScene): 출발 전·끝난 뒤 지도 자리. 늘 밤 그림이라 낮 지도에서도 바뀌지 않는다 */
+  --scene-ice: #13284a; /* 얼음 땅 */
+  --scene-ring: #2b4675; /* 위도 점선 */
+  --scene-snow: #e9eef7; /* 눈 언덕 */
+  --scene-house: #2c5fb3; /* 파란 집 */
+  --scene-text: #dbe5f5; /* 그림 위 글자 */
+  --scene-text-soft: #c9d6ee; /* 그림 위 보조 글자 */
+
   /* 글꼴: next/font가 --font-jua, --font-plex를 채운다(src/app/layout.tsx) */
   --font-display: var(--font-jua), var(--font-plex), "Apple SD Gothic Neo", sans-serif;
   --font-sans: var(--font-plex), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
