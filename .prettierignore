@@ -1,5 +1,6 @@
 # 자동 생성 파일, 그리고 스크립트가 글자를 끼워 넣는 HTML 틀
 src/lib/santa/sigungu.ts
+src/lib/santa/world-cities.ts
 scripts/preview.template.html
 public/
 

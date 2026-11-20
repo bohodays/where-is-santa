@@ -49,7 +49,7 @@ AI 작업 규칙은 [`CLAUDE.md`](CLAUDE.md), 기획서는 [`docs/plan.md`](docs
 
 ## 데이터 출처
 
-- 도시 좌표(예정): [GeoNames](https://www.geonames.org/) (CC BY 4.0)
+- 세계 도시 좌표: [GeoNames](https://www.geonames.org/) cities15000 (CC BY 4.0) — 405곳 (`docs/data-route.md`)
 - 지도 타일(예정): [OpenFreeMap](https://openfreemap.org) © OpenMapTiles © OpenStreetMap contributors
 - 국내 시군구 좌표: [국가데이터처 SGIS 행정구역 경계](https://www.data.go.kr/data/15129688/fileData.do) 2025년 2분기 기준, 2026년 화성·인천 변경 반영 (`docs/data-sigungu.md`)
-- 현재 `src/lib/santa/cities.ts`는 검증용 샘플 53곳(좌표 대략값)
+- `src/lib/santa/cities.ts`는 테스트·스토리용 샘플 53곳(좌표 대략값). 화면은 `src/lib/santa/stops.ts`(세계 도시 + 시군구)를 쓴다

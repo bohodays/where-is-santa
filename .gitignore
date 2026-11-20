@@ -42,6 +42,9 @@ Thumbs.db
 # 원본 데이터 (공공데이터포털에서 받는다. scripts/build-sigungu.mjs 참고)
 /SGIS/
 
+# 세계 도시 원본 (GeoNames cities15000, CC BY 4.0. scripts/build-route.ts 참고)
+/GEONAMES/
+
 # Storybook 빌드 결과
 storybook-static/
 *storybook.log
