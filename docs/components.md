@@ -29,7 +29,9 @@
 | 공유 | `SharePanel` | 2 | 클라이언트 | 5 |
 | 데모 | `DemoPanel` · `DemoBadge` | 3 | 클라이언트 | 5 |
 
-지금 있는 `SantaStatus`는 1주차 임시 화면이다. `SantaLocationBanner` + `CountdownCard`로 나누어 대체하고 지운다(px 고정 글자와 "890시간 43분" 표기 문제는 이때 고친다).
+1주차 임시 화면 `SantaStatus`는 2026-11-21에 `MainScreen`(아래 조각들을 잇는 컨테이너)으로 바꾸고 지웠다.
+
+**`MainScreen`(클라이언트):** 현재 시각을 읽는 유일한 곳(`useNow`). `santaAt`의 상태로 위쪽을 고른다: 출발 전·끝난 뒤는 `NorthPoleScene`, 여정 중은 지도 자리 + `SantaLocationBanner`. 아래 고정형 시트에 `CountdownCard`와 `JourneyProgress`(출발 뒤부터). 시트·설정이 아직 없어서 "동네 바꾸기"·"도착 순서 보기"·설정 버튼은 그 동작이 연결될 때(순서 5번) 보인다. 기기 시간대가 한국과 다르면 `showZone`을 켠다.
 
 ## 기본 요소
 
@@ -202,7 +204,7 @@
 ## 3~4주차 만드는 순서 (11/23~12/6, 제안)
 
 1. **로직과 기본 요소:** `formatRemaining`·`formatKstTime`·`describeSanta`·`journeyProgress` + `Button`·`IconButton`·`BottomSheet`
-2. **메인 글자 화면:** `SantaLocationBanner`·`CountdownCard`·`JourneyProgress`로 `SantaStatus` 대체, 지도 자리에 `NorthPoleScene`. 지도 없이도 완성된 첫 화면(LCP 목표의 핵심). 공개 전 방문은 이 화면을 본다
+2. ✅ **메인 글자 화면 (2026-11-21 완료):** `SantaLocationBanner`·`CountdownCard`·`JourneyProgress`로 `SantaStatus` 대체, 지도 자리에 `NorthPoleScene`. 지도 없이도 완성된 첫 화면(LCP 목표의 핵심). 공개 전 방문은 이 화면을 본다
 3. **경로 데이터 생성 스크립트:** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
 4. **지도:** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
 5. **시트:** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestSigungu`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CITIES } from "@/lib/santa/cities";
 import { buildRoute } from "@/lib/santa/route";
+import { fn } from "storybook/test";
 import { BottomSheet } from "./BottomSheet";
 import { JourneyProgress } from "./JourneyProgress";
 
@@ -11,7 +12,7 @@ const kst = (d: number, h: number, min = 0) => Date.UTC(2026, 11, d, h - 9, min)
 const meta = {
   title: "메인/JourneyProgress",
   component: JourneyProgress,
-  args: { route: ROUTE, now: kst(25, 0, 5) },
+  args: { route: ROUTE, now: kst(25, 0, 5), onShowArrivals: fn() },
   argTypes: { route: { control: false }, now: { control: "date" } },
   decorators: [
     (Story) => (

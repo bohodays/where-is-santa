@@ -26,14 +26,17 @@ export function JourneyProgress({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex min-h-touch items-center justify-between gap-2">
         <span className="text-caption text-ink-soft">
           산타의 여정 {percent !== null && <strong className="text-ink">{percent}%</strong>}
         </span>
-        <Button variant="quiet" className="no-underline" onClick={onShowArrivals}>
-          도착 순서 보기
-          <ChevronRightIcon />
-        </Button>
+        {/* 도착 순서 시트가 연결됐을 때만 보인다 */}
+        {onShowArrivals && (
+          <Button variant="quiet" className="no-underline" onClick={onShowArrivals}>
+            도착 순서 보기
+            <ChevronRightIcon />
+          </Button>
+        )}
       </div>
       {/* 화면 낭독기는 progressbar를 "산타의 여정, 전체 여정의 18%"처럼 읽는다 */}
       <div

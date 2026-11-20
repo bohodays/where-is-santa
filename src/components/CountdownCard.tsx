@@ -49,21 +49,25 @@ export function CountdownCard({
 
   return (
     <div className="flex flex-col break-keep">
-      <div className="flex items-center justify-between gap-2">
+      {/* 버튼이 없어도 줄 높이는 버튼(44px)과 같게 둔다. 나중에 버튼이 붙어도 화면이 밀리지 않는다 */}
+      <div className="flex min-h-touch items-center justify-between gap-2">
         <h2 className="text-body text-ink-soft">{homeName}까지</h2>
-        <Button
-          variant="quiet"
-          className={homeChosen ? undefined : "font-bold"}
-          onClick={onChangeHome}
-        >
-          {homeChosen ? "동네 바꾸기" : "우리 동네 고르기"}
-        </Button>
+        {/* 동네 고르기 시트가 연결됐을 때만 버튼을 보인다. 눌러도 아무 일이 없는 버튼은 내지 않는다 */}
+        {onChangeHome && (
+          <Button
+            variant="quiet"
+            className={homeChosen ? undefined : "font-bold"}
+            onClick={onChangeHome}
+          >
+            {homeChosen ? "동네 바꾸기" : "우리 동네 고르기"}
+          </Button>
+        )}
       </div>
       <div className="flex flex-col gap-1" aria-busy={state === null || undefined}>
         <p className="whitespace-pre-wrap font-display text-countdown text-ink">{big}</p>
         <p className="whitespace-pre-wrap text-body text-ink-soft">{small}</p>
       </div>
-      {!homeChosen && state !== null && (
+      {!homeChosen && onChangeHome && state !== null && (
         <p className="mt-2 text-caption text-ink-soft">
           지금은 서울 기준이에요. 동네를 고르면 더 정확해요.
         </p>
