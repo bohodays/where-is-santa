@@ -1,10 +1,10 @@
 "use client";
 
 import { useNow } from "@/hooks/useNow";
-import { CITIES } from "@/lib/santa/cities";
 import { needsKstLabel } from "@/lib/santa/format";
 import { buildRoute } from "@/lib/santa/route";
 import { santaAt } from "@/lib/santa/santa";
+import { DEFAULT_HOME_ID, STOPS } from "@/lib/santa/stops";
 import { BottomSheet } from "./BottomSheet";
 import { CountdownCard } from "./CountdownCard";
 import { JourneyProgress } from "./JourneyProgress";
@@ -16,10 +16,10 @@ import { SantaLocationBanner } from "./SantaLocationBanner";
 // 아래: 고정형 시트에 우리 동네 카운트다운과 여정 막대.
 // 데모: 주소에 ?demo=2026-12-25T00:20:00%2B09:00&speed=60 을 붙이면 그 시각부터 흐른다(useNow).
 
-// 지금은 샘플 경로(53곳). 경로 데이터 생성 스크립트(순서 3번)가 생기면 바꾼다.
-const ROUTE = buildRoute(CITIES, 2026);
-// 동네 고르기(순서 5번) 전까지는 서울 기준
-const HOME = ROUTE.find((stop) => stop.id === "seoul") ?? ROUTE[0];
+// 세계 도시 405곳 + 국내 시군구 256곳(src/lib/santa/stops.ts, docs/data-route.md)
+const ROUTE = buildRoute(STOPS, 2026);
+// 동네 고르기(순서 5번) 전까지는 서울 중구 기준
+const HOME = ROUTE.find((stop) => stop.id === DEFAULT_HOME_ID) ?? ROUTE[0];
 
 export function MainScreen() {
   const now = useNow();

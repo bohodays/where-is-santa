@@ -205,7 +205,7 @@
 
 1. **로직과 기본 요소:** `formatRemaining`·`formatKstTime`·`describeSanta`·`journeyProgress` + `Button`·`IconButton`·`BottomSheet`
 2. ✅ **메인 글자 화면 (2026-11-21 완료):** `SantaLocationBanner`·`CountdownCard`·`JourneyProgress`로 `SantaStatus` 대체, 지도 자리에 `NorthPoleScene`. 지도 없이도 완성된 첫 화면(LCP 목표의 핵심). 공개 전 방문은 이 화면을 본다
-3. **경로 데이터 생성 스크립트:** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
+3. ✅ **경로 데이터 생성 스크립트 (2026-11-21 완료, `docs/data-route.md`):** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
 4. **지도:** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
 5. **시트:** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestSigungu`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)
 6. **E2E:** Playwright로 시계를 고정해 이브 밤 흐름 확인(CLAUDE.md: 3주차부터)
