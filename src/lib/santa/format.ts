@@ -42,7 +42,7 @@ function nightDay(at: number): number {
 
 /**
  * 시각을 한국 시각 글자로. 예) 밤 12시 32분, 새벽 1시 14분, 낮 12시
- * now를 주면 앞에 날짜를 붙인다: 같은 날(새벽 5시 기준)이면 없음, 하루 차이면 "내일"·"어제", 그 밖은 "12월 25일".
+ * now를 주면 앞에 날짜를 붙인다: 같은 날(새벽 5시 기준)이면 없음, 하루 차이면 "내일"·"어제", 그 밖은 "12월 24일"(밤 12시대는 전날 날짜).
  * showZone이 true면 맨 앞에 "한국 시각"을 붙인다(기기 시계가 한국과 다를 때, needsKstLabel 참고).
  */
 export function formatKstTime(
@@ -61,7 +61,10 @@ export function formatKstTime(
   if (diff === 0) return `${zone}${time}`;
   if (diff === 1) return `${zone}내일 ${time}`;
   if (diff === -1) return `${zone}어제 ${time}`;
-  return `${zone}${local.getUTCMonth() + 1}월 ${local.getUTCDate()}일 ${time}`;
+  // "밤 12시대"(0시)는 전날 밤 날짜로 쓴다. "12월 25일 밤 12시 32분"이라 하면 25일 밤(하루 뒤)으로 읽힌다.
+  // "새벽 1시"부터는 달력 날짜 그대로가 자연스럽다("12월 25일 새벽 1시 14분").
+  const dateOf = local.getUTCHours() === 0 ? new Date(at + KST_OFFSET - DAY) : local;
+  return `${zone}${dateOf.getUTCMonth() + 1}월 ${dateOf.getUTCDate()}일 ${time}`;
 }
 
 const CLOCK_PARTS: Intl.DateTimeFormatOptions = {
