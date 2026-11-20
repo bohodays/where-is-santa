@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CITIES } from "@/lib/santa/cities";
 import { buildRoute } from "@/lib/santa/route";
+import { fn } from "storybook/test";
 import { BottomSheet } from "./BottomSheet";
 import { CountdownCard } from "./CountdownCard";
 
@@ -18,6 +19,7 @@ const meta = {
     homeName: "서울 마포구",
     arriveUtc: SEOUL.arriveUtc,
     homeChosen: true,
+    onChangeHome: fn(),
   },
   argTypes: { now: { control: "date" }, arriveUtc: { control: "date" } },
   decorators: [

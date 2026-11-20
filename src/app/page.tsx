@@ -1,11 +1,6 @@
-import { SantaStatus } from "@/components/SantaStatus";
+import { MainScreen } from "@/components/MainScreen";
 
-// 1주차 임시 화면: 경로 로직이 앱 안에서 도는지만 확인한다.
-// 지도(MapLibre)와 시안 UI는 3주차에 붙인다.
+// 메인 화면. 시각을 읽는 MainScreen은 클라이언트 컴포넌트라, 서버는 시각 없는 첫 화면(자리만 잡힌 시트)을 보낸다.
 export default function Home() {
-  return (
-    <main className="mx-auto flex min-h-full max-w-md flex-col justify-end gap-4 px-4 pb-8 pt-6">
-      <SantaStatus homeCityId="seoul" />
-    </main>
-  );
+  return <MainScreen />;
 }
