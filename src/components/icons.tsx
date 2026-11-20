@@ -49,3 +49,12 @@ export function CloseIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** 오른쪽 꺾쇠(>). Lucide "chevron-right" */
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Icon width={16} height={16} {...props}>
+      <path d="m9 18 6-6-6-6" />
+    </Icon>
+  );
+}

@@ -69,9 +69,15 @@ describe("formatKstTime: 한국 시각", () => {
     assert.equal(formatKstTime(kst(12, 24, 23, 41), kst(12, 25, 1, 0)), "밤 11시 41분");
   });
 
-  test("이틀 이상 떨어지면 날짜를 쓴다 (날짜는 실제 달력 날짜)", () => {
-    assert.equal(formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21, 0)), "12월 25일 밤 12시 32분");
+  test("이틀 이상 떨어지면 날짜를 쓴다", () => {
     assert.equal(formatKstTime(kst(12, 24, 19, 29), kst(11, 19, 21, 0)), "12월 24일 밤 7시 29분");
+    assert.equal(formatKstTime(kst(12, 25, 1, 14), kst(11, 19, 21, 0)), "12월 25일 새벽 1시 14분");
+  });
+
+  test('"밤 12시대"(0시)는 전날 밤 날짜로 쓴다 ("12월 25일 밤"이라 하면 하루 뒤로 읽힌다)', () => {
+    assert.equal(formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21, 0)), "12월 24일 밤 12시 32분");
+    assert.equal(formatKstTime(kst(12, 25, 0, 0), kst(11, 19, 21, 0)), "12월 24일 밤 12시");
+    assert.equal(formatKstTime(kst(12, 1, 0, 10), kst(11, 19, 21, 0)), "11월 30일 밤 12시 10분"); // 달이 바뀌는 날
   });
 
   test('showZone이면 맨 앞에 "한국 시각"을 붙인다', () => {
@@ -83,7 +89,7 @@ describe("formatKstTime: 한국 시각", () => {
     );
     assert.equal(
       formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21, 0), zone),
-      "한국 시각 12월 25일 밤 12시 32분",
+      "한국 시각 12월 24일 밤 12시 32분",
     );
   });
 });
