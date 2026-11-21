@@ -1,10 +1,10 @@
 "use client";
 
 import { useNow } from "@/hooks/useNow";
+import { useRoute } from "@/hooks/useRoute";
 import { needsKstLabel } from "@/lib/santa/format";
-import { buildRoute } from "@/lib/santa/route";
-import { santaAt } from "@/lib/santa/santa";
-import { DEFAULT_HOME_ID, STOPS } from "@/lib/santa/stops";
+import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
+import { journeyPhase } from "@/lib/santa/santa";
 import { BottomSheet } from "./BottomSheet";
 import { CountdownCard } from "./CountdownCard";
 import { JourneyProgress } from "./JourneyProgress";
@@ -16,15 +16,16 @@ import { SantaLocationBanner } from "./SantaLocationBanner";
 // 아래: 고정형 시트에 우리 동네 카운트다운과 여정 막대.
 // 데모: 주소에 ?demo=2026-12-25T00:20:00%2B09:00&speed=60 을 붙이면 그 시각부터 흐른다(useNow).
 
-// 세계 도시 405곳 + 국내 시군구 256곳(src/lib/santa/stops.ts, docs/data-route.md)
-const ROUTE = buildRoute(STOPS, 2026);
-// 동네 고르기(순서 5번) 전까지는 서울 중구 기준
-const HOME = ROUTE.find((stop) => stop.id === DEFAULT_HOME_ID) ?? ROUTE[0];
+// 첫 화면은 경로 요약(첫 도착·마지막 도착·기본 동네)만 쓴다. 전체 경로(661곳)는 출발 직전에 불러온다(useRoute).
+const { first: FIRST, last: LAST, defaultHome: HOME } = ROUTE_SUMMARY;
+/** 출발 이만큼 전부터 전체 경로를 미리 받아 둔다. 출발 순간 "산타를 찾는 중…"이 길게 보이지 않게 */
+const PRELOAD_MS = 10 * 60_000;
 
 export function MainScreen() {
   const now = useNow();
-  const status = now === null ? null : santaAt(now, ROUTE).status;
-  const onJourney = status === "visiting" || status === "flying";
+  const phase = now === null ? null : journeyPhase(now, FIRST.arriveUtc, LAST.arriveUtc);
+  const onJourney = phase === "journey";
+  const route = useRoute(now !== null && phase !== "after" && now >= FIRST.arriveUtc - PRELOAD_MS);
   // 기기 시계가 한국과 다르면 시각 앞에 "한국 시각"을 붙인다. 브라우저의 시간대 설정을 읽으므로 시각을 안 뒤에만 계산한다
   const showZone =
     now !== null && needsKstLabel(Intl.DateTimeFormat().resolvedOptions().timeZone, now);
@@ -36,14 +37,18 @@ export function MainScreen() {
 
       {/* 위쪽: 시트 둥근 모서리 뒤로 지도·그림이 이어져 보이게 시트를 살짝(-mt-6) 겹친다 */}
       <div className="relative min-h-0 flex-1">
-        {status === "before" && (
-          <NorthPoleScene phase="before" now={now} route={ROUTE} showZone={showZone} />
+        {phase === "before" && (
+          <NorthPoleScene phase="before" now={now} first={FIRST} showZone={showZone} />
         )}
-        {status === "after" && <NorthPoleScene phase="after" now={now} route={ROUTE} />}
+        {phase === "after" && <NorthPoleScene phase="after" now={now} first={FIRST} />}
         {onJourney && (
           <div className="absolute inset-0 bg-map-sea">
             <div className="absolute inset-x-4 top-5">
-              <SantaLocationBanner now={now} route={ROUTE} />
+              <SantaLocationBanner
+                now={now}
+                route={route.status === "ready" ? route.route : null}
+                loadFailed={route.status === "failed"}
+              />
             </div>
           </div>
         )}
@@ -57,8 +62,13 @@ export function MainScreen() {
           homeChosen={false}
           showZone={showZone}
         />
-        {status !== null && status !== "before" && (
-          <JourneyProgress now={now} route={ROUTE} showZone={showZone} />
+        {phase !== null && phase !== "before" && (
+          <JourneyProgress
+            now={now}
+            start={FIRST.arriveUtc}
+            end={LAST.arriveUtc}
+            showZone={showZone}
+          />
         )}
       </BottomSheet>
     </main>

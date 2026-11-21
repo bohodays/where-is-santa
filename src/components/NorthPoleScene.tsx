@@ -1,5 +1,4 @@
 import { formatKstTime, formatRemaining } from "@/lib/santa/format";
-import type { Stop } from "@/lib/santa/route";
 
 // 출발 전·끝난 뒤 지도 자리를 채우는 북극 마을 그림(결정 2026-11-17, docs/components.md).
 // 메르카토르 지도는 북극을 그리지 못해서, 산타가 북극에 있는 동안은 지도 대신 이 그림을 보여준다.
@@ -11,13 +10,13 @@ type NorthPoleSceneProps = {
   phase: "before" | "after";
   /** 현재 시각(epoch ms). 아직 모르면 null */
   now: number | null;
-  route: Stop[];
+  /** 첫 도착(출발) 도시. 전체 경로 없이 요약만 받는다(route-summary.ts) */
+  first: { name: string; arriveUtc: number };
   /** 기기 시계가 한국과 다르면 true(needsKstLabel) */
   showZone?: boolean;
 };
 
-export function NorthPoleScene({ phase, now, route, showZone = false }: NorthPoleSceneProps) {
-  const first = route[0];
+export function NorthPoleScene({ phase, now, first, showZone = false }: NorthPoleSceneProps) {
   const before = phase === "before";
 
   return (
@@ -34,9 +33,9 @@ export function NorthPoleScene({ phase, now, route, showZone = false }: NorthPol
           <>
             <p className="text-body text-scene-text">산타 출발까지</p>
             <p className="whitespace-pre-wrap font-display text-countdown text-gold">
-              {now === null || !first ? " " : formatRemaining(first.arriveUtc - now)}
+              {now === null ? " " : formatRemaining(first.arriveUtc - now)}
             </p>
-            {now !== null && first && (
+            {now !== null && (
               <p className="text-caption text-scene-text-soft">
                 {formatKstTime(first.arriveUtc, now, { showZone })}, {first.name}에서 출발해요
               </p>
