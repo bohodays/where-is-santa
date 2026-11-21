@@ -122,7 +122,7 @@
   - 도착("산타가 우리 동네에 왔어요"), 지나감("산타가 다녀갔어요")
 - **토큰:** `text-countdown` `font-display`, `text-body`, `ink`, `ink-soft`.
 - **접근성:** 남은 시간은 1초마다 읽지 않는다(`aria-live` 없음). 도착 순간만 `SantaLocationBanner`에서 알린다.
-- **로직:** `timeUntil`, 남은 시간·도착 시각 표기(순수 함수), `useHome`.
+- **로직:** `timeUntil`, 남은 시간·도착 시각 표기(순수 함수), `useHome`. 고른 동네를 읽기 전(서버 렌더·첫 화면)에는 `homeName`이 null이라 "우리 동네까지".
 - **스토리:** 상태별, 큰 글씨(줄바꿈 확인), 고대비.
 - **구현(2026-11-21):** 상태는 `homeCountdown`(`src/lib/santa/countdown.ts`)이 정한다. 도착 뒤 5분(`ARRIVED_FOR_MS`) 동안 "산타가 왔어요!", 그 뒤 "다녀갔어요". 시각을 모르는 첫 렌더에도 같은 높이를 잡아 둔다(레이아웃 이동 방지).
 
@@ -166,6 +166,14 @@
 - **접근성:** `<label>` 있는 `<input type="search">`, 결과 개수를 `aria-live`로 알림("찾은 동네 2곳"), 결과는 버튼(`aria-pressed`), 56px 이상.
 - **로직:** 초성 검색(순수 함수), 가장 가까운 시군구(순수 함수), `SIGUNGU` 데이터, `useHome`(localStorage, 서버로 보내지 않는다).
 - **스토리:** 상태별, "ㅁㅍ" 검색(마포구·목포시), 큰 글씨.
+- **구현(2026-11-22):**
+  - **검색:** `matchChosung`(`src/lib/hangul.ts`)이 초성("ㅁㅍ"), 완성 글자, 섞어 치기, 치는 중인 마지막 글자("모"→목포, "맢"→마포)를 찾는다. `searchNeighborhoods`는 이름이 검색어로 시작 → 이름 가운데 → 시도 이름("서울", "강원") 순, 같으면 이름 가나다순.
+  - **내 위치로 찾기:** 하나를 바로 고르지 않고 가까운 3곳을 거리와 함께 보여주고 사람이 고른다(대표점 거리라 경계 근처는 이웃 동네가 먼저 나올 수 있다). 대표점에서 먼 섬(가거도·흑산도·연평도·추자도·독도 등)은 섬 위치를 따로 둬서 제 동네가 먼저 나온다. 가장 가까운 동네가 150km보다 멀면 "한국 밖". 위치는 계산에만 쓰고 보내지 않는다.
+  - **고르면:** 바로 저장하고 시트를 닫는다. 카운트다운·도착 순서·지도 표시가 새 동네로 바뀐다. 지도는 다시 만들지 않고 우리 동네 표시만 옮긴다.
+  - **불러오기:** 시군구 목록(gzip 약 5.6 kB, 경로 데이터와 같은 파일)은 시트를 열 때 받는다(`useNeighborhoods`). 고른 동네는 이름·좌표째 저장해서(`home.ts`) 첫 화면은 목록 없이 바로 카운트다운을 보여준다.
+  - **저장(`useHome`):** localStorage `where-is-santa:home`에 `{v, id, name, lat, lon}`. 읽을 때 모양·범위를 검사하고 틀리면 기본 동네. 도착 시각은 저장하지 않고 좌표로 다시 계산한다. 저장이 막힌 브라우저(사생활 보호 모드)는 이번 방문 동안만 기억한다. 다른 탭에서 바꾸면 따라 바뀐다.
+  - **움직임 (사람 검토 2026-11-22):** 검색 결과가 너무 갑자기 생기고 사라진다는 의견. 새로 생긴 동네만 0.18초 동안 서서히 나타나고(4px 올라옴, `.list-enter`), 사라지는 동네는 바로 빠진다(사라짐 효과는 새 의존성이나 View Transitions가 필요하고 빠른 입력에서 버벅일 수 있어 하지 않음). 결과 칸은 3줄 높이(11.5rem)를 늘 잡아 두어 결과 0~3곳 사이에서는 "내 위치로 찾기"가 움직이지 않는다. 움직임 줄이기면 애니메이션을 끈다.
+  - **첫 화면:** 서버 렌더와 첫 화면은 저장 값을 모르므로 "우리 동네까지"로 그리고 "동네 고르기" 버튼은 저장 값을 읽은 뒤에 보인다(새로고침 때 잠깐 "서울 중구"가 보이지 않게).
 
 ### SettingsPanel
 - **역할:** 지도 밝기, 큰 글씨, 고대비, 움직임 줄이기, 소리, 출처.
@@ -201,9 +209,9 @@
 | `arrivalRows` | `src/lib/santa/arrivals.ts` | 도착 순서 목록에 보일 앞뒤 도시와 우리 동네(처음 이름은 `nearbyStops`) | ✅ |
 | `journeyProgress` | `src/lib/santa/` | 전체 여정 진행률 | 3~4 |
 | `sunElevation`·`isDaytime`·`mapToneAt` | `src/lib/santa/sun.ts` | 태양 고도로 해가 떠 있는지(낮/밤 지도). 해 뜨는 시각 대신 고도를 직접 계산해 날짜 경계·극지방 문제가 없다(처음 이름은 `sunTimes`) | ✅ |
-| `matchChosung` | `src/lib/` (새 폴더 또는 santa 옆) | 초성 검색 | 3~4 |
-| `nearestSigungu` | `src/lib/santa/` | 위치에서 가장 가까운 시군구 | 3~4 |
-| `useHome` | `src/hooks/` | 고른 동네(localStorage) | 3~4 |
+| `matchChosung` | `src/lib/hangul.ts` | 초성 검색 | ✅ |
+| `searchNeighborhoods`·`nearestNeighborhoods` | `src/lib/santa/neighborhood-search.ts` | 동네 검색, 위치에서 가까운 시군구 3곳(처음 이름은 `nearestSigungu`) | ✅ |
+| `useHome` | `src/hooks/useHome.ts` | 고른 동네(localStorage, 저장 형식 검사는 `src/lib/santa/home.ts`) | ✅ |
 | `useSettings` | `src/hooks/` | 설정(localStorage) + `<html>` 속성 반영 | 3~4 |
 | `useMapTone` | `src/hooks/` | 설정 "자동"이면 우리 동네 해로 낮/밤 결정, `<html data-map-tone>`을 바꾼다. 지도는 속성이 바뀌면 색만 다시 칠한다(`colorPaint`) | ✅ |
 

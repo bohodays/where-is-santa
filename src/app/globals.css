@@ -200,6 +200,29 @@ html[data-text-size="large"] {
     }
   }
 
+  /*
+   * 목록에 새로 생긴 항목이 서서히 나타난다(동네 고르기 검색 결과).
+   * 화면에 처음 붙을 때만 움직인다. React key가 같으면 다시 붙지 않으므로, 검색어가 바뀌어도 남아 있는 항목은 가만히 있다.
+   * 사라지는 항목은 바로 빠진다.
+   */
+  .list-enter {
+    animation: list-enter 0.18s ease-out both;
+  }
+
+  /* 움직임 줄이기: 애니메이션을 아예 끈다. 시간만 0에 가깝게 하면 결과가 많을 때(128곳) 첫 한 프레임이 투명하게 그려졌다 */
+  @media (prefers-reduced-motion: reduce) {
+    .list-enter {
+      animation: none;
+    }
+  }
+
+  @keyframes list-enter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
   /* 시트가 열려 있는 동안 뒤 화면이 스크롤되지 않게 */
   html:has(.modal-sheet[open]) {
     overflow: hidden;
