@@ -28,6 +28,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Scene: Story = { name: "시안 장면 (밤 12시 5분)" };
-export const Before: Story = { name: "출발 전 (0%)", args: { now: kst(24, 12) } };
+export const Before: Story = { name: "출발 전 (빈 막대)", args: { now: kst(24, 12) } };
 export const After: Story = { name: "끝난 뒤 (100%)", args: { now: kst(26, 0) } };
 export const Loading: Story = { name: "불러오는 중", args: { now: null } };

@@ -5,6 +5,8 @@ import { ChevronRightIcon } from "./icons";
 
 // "산타의 여정 18%" 막대와 출발·끝 시각, "도착 순서 보기".
 // 전체 경로 없이 첫 도착·마지막 도착 시각만 받는다(첫 화면 JS를 가볍게, route-summary.ts).
+// 출발 전에도 같은 모양(빈 막대, "출발 전")으로 보인다. 시각을 모르는 첫 화면에서도 같은 높이를 잡아 둔다:
+// 서버는 지금이 출발 전인지 여정 중인지 몰라서, 단계마다 높이가 다르면 시각을 안 뒤 카드가 커지며 화면이 밀렸다(결정 2026-11-22).
 
 type JourneyProgressProps = {
   /** 현재 시각(epoch ms). 아직 모르면 null */
@@ -25,12 +27,16 @@ export function JourneyProgress({
   onShowArrivals,
 }: JourneyProgressProps) {
   const percent = now === null ? null : Math.round(progressBetween(now, start, end) * 100);
+  const before = now !== null && now < start;
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex min-h-touch items-center justify-between gap-2">
         <span className="text-caption text-ink-soft">
-          산타의 여정 {percent !== null && <strong className="text-ink">{percent}%</strong>}
+          산타의 여정{" "}
+          {before
+            ? "· 출발 전"
+            : percent !== null && <strong className="text-ink">{percent}%</strong>}
         </span>
         {/* 도착 순서 시트가 연결됐을 때만 보인다 */}
         {onShowArrivals && (
@@ -47,17 +53,22 @@ export function JourneyProgress({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent ?? undefined}
-        aria-valuetext={percent === null ? "불러오는 중" : `전체 여정의 ${percent}%`}
+        aria-valuetext={
+          percent === null ? "불러오는 중" : before ? "출발 전" : `전체 여정의 ${percent}%`
+        }
         className="h-2.5 overflow-hidden rounded-pill bg-line"
       >
         <div className="h-full rounded-pill bg-santa" style={{ width: `${percent ?? 0}%` }} />
       </div>
-      {now !== null && (
-        <div className="flex justify-between gap-2 text-caption text-ink-soft">
-          <span>출발 {formatKstTime(start, now, { showZone })}</span>
-          <span>끝 {formatKstTime(end, now)}</span>
-        </div>
-      )}
+      {/* 시각을 모를 때도 줄 높이(글자 한 줄, 1.5em)는 잡아 둔다. 글자는 시각을 안 뒤에 채운다 */}
+      <div className="flex min-h-[1.5em] justify-between gap-2 text-caption text-ink-soft">
+        {now !== null && (
+          <>
+            <span>출발 {formatKstTime(start, now, { showZone })}</span>
+            <span>끝 {formatKstTime(end, now)}</span>
+          </>
+        )}
+      </div>
     </div>
   );
 }

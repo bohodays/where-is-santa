@@ -226,6 +226,11 @@ html[data-text-size="large"] {
     }
   }
 
+  /* 동네를 고른 사람에게는 "지금은 서울 기준이에요" 안내를 첫 화면부터 숨긴다(HOME_BOOT_SCRIPT, CountdownCard) */
+  html[data-home="chosen"] .hide-when-home-chosen {
+    display: none;
+  }
+
   /* 시트가 열려 있는 동안 뒤 화면이 스크롤되지 않게 */
   html:has(.modal-sheet[open]) {
     overflow: hidden;
