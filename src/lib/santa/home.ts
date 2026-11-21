@@ -67,3 +67,14 @@ export function parseStoredHome(raw: string | null): Home | null {
     arriveUtc: arrivalUtc(effectiveLongitude(lon, KOREA_UTC_OFFSET), ROUTE_YEAR),
   };
 }
+
+/**
+ * 첫 화면을 그리기 전에 <head>에서 실행할 짧은 스크립트(app/layout.tsx). 동네를 골랐으면 <html data-home="chosen">.
+ * 서버가 그린 첫 화면에는 "지금은 서울 기준이에요" 안내가 늘 들어 있다(동네를 골랐는지 서버는 모른다).
+ * 고른 사람에게는 이 속성으로 처음부터 숨긴다(globals.css). React가 뜬 뒤 안내가 생기거나 없어지며 화면이 밀리지 않게.
+ * 검사는 parseStoredHome과 같게 둔다(home.test.ts가 실제로 실행해 비교한다).
+ * 정규식의 \w는 이 글자(템플릿 문자열) 안이라 \\w로 적는다. \w로 적으면 그냥 w가 되어 모든 동네를 "안 고름"으로 본다.
+ */
+export const HOME_BOOT_SCRIPT = `(function(){try{var h=JSON.parse(localStorage.getItem(${JSON.stringify(
+  HOME_STORAGE_KEY,
+)})||"null");if(h&&typeof h==="object"&&!Array.isArray(h)&&h.v===${VERSION}&&typeof h.id==="string"&&/^kr-[\\w-]{1,40}$/.test(h.id)&&typeof h.name==="string"&&h.name.length>=1&&h.name.length<=30&&typeof h.lat==="number"&&h.lat>=32&&h.lat<=39&&typeof h.lon==="number"&&h.lon>=124&&h.lon<=132)document.documentElement.setAttribute("data-home","chosen")}catch(e){}})();`;

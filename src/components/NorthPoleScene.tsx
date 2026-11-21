@@ -20,31 +20,26 @@ export function NorthPoleScene({ phase, now, first, showZone = false }: NorthPol
   const before = phase === "before";
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-night">
-      <VillageDrawing
-        label={
-          before ? "북극 마을에서 출발을 준비하는 산타" : "여정을 마치고 북극 마을로 돌아온 산타"
-        }
-        caption={before ? "북극 마을 · 선물 포장 중" : "북극 마을 · 쉬는 중"}
-      />
-      {/* 글자는 그림 위에 따로 둔다. 그림 속 글자(SVG text)는 크기가 화면 폭을 따라 변해 큰 글씨 모드가 듣지 않는다 */}
+    // 위: 글자, 아래: 남은 칸을 채우는 그림. 글자와 그림이 겹치지 않는다(작은 화면에서는 그림이 작아진다).
+    // 예전에는 그림이 칸 전체를 채우고 글자가 그 위에 떠 있어서, 칸이 낮아지면(320×568, 큰 글씨) 글자가 산타 그림을 덮었다
+    <div className="flex h-full w-full flex-col overflow-hidden bg-night">
+      {/* 글자는 그림 밖 HTML로 둔다. 그림 속 글자(SVG text)는 크기가 화면 폭을 따라 변해 큰 글씨 모드가 듣지 않는다 */}
       {/*
         오른쪽 위 설정 버튼(위 20px, 44×44px)에 글자가 가리지 않게(좁은 화면에서 큰 카운트다운이 버튼과 겹쳤다):
-        첫 줄은 버튼과 같은 높이의 줄(FIRST_ROW)에 두고 양옆을 비운다. 그 아래 글자는 버튼 아래에서 시작해 폭을 다 쓴다.
-        글자 덩어리를 통째로 내리거나 양옆을 다 비우면 작은 화면(320×568)에서 산타 그림까지 내려와서 쓰지 않았다
+        첫 줄은 버튼과 같은 높이의 줄(FIRST_ROW)에 두고 양옆을 비운다. 그 아래 글자는 버튼 아래에서 시작해 폭을 다 쓴다
       */}
-      <div className="absolute inset-x-4 top-5 flex flex-col items-center gap-1 break-keep text-center">
+      <div className="flex shrink-0 flex-col items-center gap-1 break-keep px-4 pt-5 text-center">
         {before ? (
           <>
             <p className={`${FIRST_ROW} text-body text-scene-text`}>산타 출발까지</p>
             <p className="whitespace-pre-wrap font-display text-countdown text-gold">
               {now === null ? " " : formatRemaining(first.arriveUtc - now)}
             </p>
-            {now !== null && (
-              <p className="text-caption text-scene-text-soft">
-                {formatKstTime(first.arriveUtc, now, { showZone })}, {first.name}에서 출발해요
-              </p>
-            )}
+            {/* 시각을 모를 때도 한 줄 높이를 잡아 둔다. 나중에 생기면 아래 그림이 줄어들며 화면이 밀린다 */}
+            <p className="min-h-[1.5em] text-caption text-scene-text-soft">
+              {now !== null &&
+                `${formatKstTime(first.arriveUtc, now, { showZone })}, ${first.name}에서 출발해요`}
+            </p>
           </>
         ) : (
           <>
@@ -55,18 +50,28 @@ export function NorthPoleScene({ phase, now, first, showZone = false }: NorthPol
           </>
         )}
       </div>
+      {/* 아래 24px은 메인 화면의 카드가 겹쳐 올라오는 곳(MainScreen -mt-6). 그림이 가려지지 않게 비운다 */}
+      <div className="relative mb-6 min-h-0 flex-1">
+        <VillageDrawing
+          label={
+            before ? "북극 마을에서 출발을 준비하는 산타" : "여정을 마치고 북극 마을로 돌아온 산타"
+          }
+          caption={before ? "북극 마을 · 선물 포장 중" : "북극 마을 · 쉬는 중"}
+        />
+      </div>
     </div>
   );
 }
 
 /**
- * 북극 마을 그림(화면 시안 "3. 시즌 전"). 390×520 기준으로 그리고, 화면 크기에 맞춰 늘거나 줄어든다.
- * preserveAspectRatio "xMidYMax meet": 그림 전체가 보이게 맞추고 아래쪽에 붙인다(위쪽 빈 곳은 밤하늘 바탕색).
+ * 북극 마을 그림(화면 시안 "3. 시즌 전"). 390×520 기준으로 그렸고, 글자 아래 남은 칸에 맞춰 늘거나 줄어든다.
+ * viewBox는 위쪽 빈 밤하늘(y 0~80, 예전에 글자가 있던 곳)을 잘라 그림이 더 크게 보이게 한다.
+ * preserveAspectRatio "xMidYMax meet": 그림 전체가 보이게 맞추고 아래쪽에 붙인다(남는 곳은 밤하늘 바탕색).
  */
 function VillageDrawing({ label, caption }: { label: string; caption: string }) {
   return (
     <svg
-      viewBox="0 0 390 520"
+      viewBox="0 80 390 440"
       preserveAspectRatio="xMidYMax meet"
       role="img"
       aria-label={label}

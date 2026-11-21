@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
   DEFAULT_HOME,
   HOME_STORAGE_KEY,
@@ -33,10 +33,20 @@ export function useHome(): HomeState {
   const [raw, write] = useStoredString(HOME_STORAGE_KEY);
   const stored = raw === undefined ? null : parse(raw);
   const setHome = useCallback((n: Neighborhood) => write(serializeHome(n)), [write]);
+  const known = raw !== undefined;
+  const chosen = stored !== null;
+
+  // 첫 화면 스크립트(HOME_BOOT_SCRIPT)가 켠 <html data-home="chosen">을 저장 값에 맞춰 둔다(동네를 바꾸거나 지울 때)
+  useEffect(() => {
+    if (!known) return;
+    if (chosen) document.documentElement.setAttribute("data-home", "chosen");
+    else document.documentElement.removeAttribute("data-home");
+  }, [known, chosen]);
+
   return {
     home: stored ?? DEFAULT_HOME,
-    chosen: stored !== null,
-    known: raw !== undefined,
+    chosen,
+    known,
     setHome,
   };
 }
