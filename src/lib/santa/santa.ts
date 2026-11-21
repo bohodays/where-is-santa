@@ -1,4 +1,4 @@
-import type { Stop } from "./route";
+import { wrapLongitude, type Stop } from "./route";
 
 export const DWELL_MS = 30_000; // 도시마다 머무는 시간
 
@@ -13,10 +13,14 @@ export type SantaState = {
 };
 
 const NORTH_POLE = { lat: 90, lon: 0 };
+const HOUR = 3_600_000;
 const rad = (d: number) => (d * Math.PI) / 180;
 const deg = (r: number) => (r * 180) / Math.PI;
 
-/** 두 지점 사이 대권(지구 곡면 최단 경로) 위의 t 지점 */
+/**
+ * 두 지점 사이 대권(지구 곡면 최단 경로) 위의 t 지점.
+ * 산타 위치에는 쓰지 않는다(자정선을 탄다, santaAt). 확인 화면(scripts/build-preview.ts)이 지난 경로를 그릴 때 쓴다.
+ */
 export function greatCircle(
   a: { lat: number; lon: number },
   b: { lat: number; lon: number },
@@ -103,9 +107,20 @@ export function santaAt(now: number, route: Stop[]): SantaState {
     };
   }
 
+  // 비행 중에는 자정선을 탄다(결정 2026-11-22, docs/components.md SantaMap).
+  // 경도 = 지금 자정인 경도. 다음 도시 도착 시각에 정확히 그 도시 경도에 닿고, 늘 서쪽으로 1시간에 15도씩 움직인다.
+  // 위도 = 두 도시 사이를 진행률만큼. 도착이 경도로만 정해져 남북으로 크게 튀는 구간이 많아서, 대권으로 날면 지도를 가로지른다.
+  // 연도 없이 계산한다: 자정선은 다음 도시 경도에서 남은 시간만큼 동쪽(1시간에 15도)이다.
   const progress = (now - departAt) / (next.arriveUtc - departAt);
-  const pos = greatCircle(prev, next, progress);
-  return { status: "flying", ...pos, prev, next, progress, visitedCount };
+  return {
+    status: "flying",
+    lat: prev.lat + (next.lat - prev.lat) * progress,
+    lon: wrapLongitude(next.effLon + ((next.arriveUtc - now) / HOUR) * 15),
+    prev,
+    next,
+    progress,
+    visitedCount,
+  };
 }
 
 /** 특정 도시 도착까지 남은 시간(ms). 이미 지났으면 0 */

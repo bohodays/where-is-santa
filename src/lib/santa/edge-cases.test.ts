@@ -3,7 +3,14 @@
 import { test } from "vitest";
 import assert from "node:assert/strict";
 import { CITIES, type City } from "./cities";
-import { buildRoute, effectiveLongitude, localClockHour, type Stop } from "./route";
+import {
+  buildRoute,
+  effectiveLongitude,
+  localClockHour,
+  midnightLongitude,
+  wrapLongitude,
+  type Stop,
+} from "./route";
 import { santaAt, DWELL_MS } from "./santa";
 
 const HOUR = 3_600_000;
@@ -38,16 +45,6 @@ function assertNear(actual: number, expected: number, label: string) {
 
 /** 도착 순간의 현지 시계를 UTC처럼 읽은 값. 날짜까지 비교할 때 쓴다 */
 const localArrival = (stop: Stop) => stop.arriveUtc + stop.utcOffset * HOUR;
-
-/** 두 지점 사이의 중심각(도). santa.ts와 다른 공식(하버사인)으로 따로 계산한다 */
-function arcDegrees(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
-  const rad = (d: number) => (d * Math.PI) / 180;
-  const dLat = rad(b.lat - a.lat);
-  const dLon = rad(b.lon - a.lon);
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
-  return (2 * Math.asin(Math.min(1, Math.sqrt(h))) * 180) / Math.PI;
-}
 
 // ---- 30분·45분 단위 시간대 ----
 
@@ -180,17 +177,24 @@ test("날짜변경선을 건너는 비행은 180도 근처로 지나간다 (지�
   }
 });
 
-test("모든 구간에서 산타는 두 도시 사이의 최단 경로 위에 있다", () => {
+// 2026-11-22 바꿈: 비행 중 산타는 두 도시 사이 최단 경로(대권) 대신 자정선 위에 있다.
+// 도착이 경도로만 정해져 남북으로 크게 튀는 구간이 많아서(실제 경로 660구간 중 141개가 3,000km 넘음),
+// 대권으로 날면 산타가 몇 초 만에 지도를 가로지른다. 자정선을 타면 늘 서쪽으로 천천히 움직이고 도착 순간에 정확히 그 도시에 닿는다.
+test("모든 구간에서 비행 중 산타는 자정선 위에 있고, 위도는 두 도시 사이를 진행률만큼 간다", () => {
   for (let i = 0; i + 1 < edgeRoute.length; i++) {
     const [from, to] = [edgeRoute[i], edgeRoute[i + 1]];
     const gap = to.arriveUtc - from.arriveUtc;
+    if (gap <= 0) continue; // 같은 순간 도착은 비행이 없다
     const depart = from.arriveUtc + Math.min(DWELL_MS, gap / 2);
-    const whole = arcDegrees(from, to);
 
     for (const ratio of [0.25, 0.5, 0.75]) {
-      const pos = santaAt(depart + (to.arriveUtc - depart) * ratio, edgeRoute);
-      const detour = arcDegrees(from, pos) + arcDegrees(pos, to) - whole;
-      assert.ok(Math.abs(detour) < 1e-6, `${from.name} → ${to.name}: 우회 ${detour}도`);
+      const now = depart + (to.arriveUtc - depart) * ratio;
+      const pos = santaAt(now, edgeRoute);
+      assert.equal(pos.status, "flying");
+      const lonGap = Math.abs(wrapLongitude(pos.lon - midnightLongitude(now, YEAR)));
+      assert.ok(lonGap < 1e-9, `${from.name} → ${to.name}: 자정선과 ${lonGap}도 차이`);
+      const lat = from.lat + (to.lat - from.lat) * ratio;
+      assert.ok(Math.abs(pos.lat - lat) < 1e-9, `${from.name} → ${to.name}: 위도 ${pos.lat}`);
     }
   }
 });
