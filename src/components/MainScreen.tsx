@@ -12,10 +12,9 @@ import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { journeyPhase } from "@/lib/santa/santa";
 import { ArrivalList } from "./ArrivalList";
 import { BottomSheet } from "./BottomSheet";
-import { Button } from "./Button";
 import { CountdownCard } from "./CountdownCard";
 import { IconButton } from "./IconButton";
-import { ChevronRightIcon, GearIcon } from "./icons";
+import { GearIcon } from "./icons";
 import { JourneyProgress } from "./JourneyProgress";
 import { loadMapLibrary, SantaMap } from "./map/SantaMap";
 import { ModalSheet } from "./ModalSheet";
@@ -104,22 +103,14 @@ export function MainScreen() {
           // 고른 동네를 읽기 전에는 버튼 글자("고르기"/"바꾸기")를 모르므로 내지 않는다. 자리 높이는 그대로다
           onChangeHome={known ? () => setPickerOpen(true) : undefined}
         />
-        {phase !== null && phase !== "before" && (
-          <JourneyProgress
-            now={now}
-            start={FIRST.arriveUtc}
-            end={LAST.arriveUtc}
-            showZone={showZone}
-            onShowArrivals={openArrivals}
-          />
-        )}
-        {/* 출발 전에는 여정 막대가 없으므로 도착 순서(예정 목록) 버튼만 둔다 */}
-        {phase === "before" && (
-          <Button variant="quiet" className="self-end no-underline" onClick={openArrivals}>
-            도착 순서 보기
-            <ChevronRightIcon />
-          </Button>
-        )}
+        {/* 출발 전·여정 중·끝난 뒤, 그리고 시각을 모르는 첫 화면까지 늘 같은 모양(같은 높이). 출발 전은 빈 막대 */}
+        <JourneyProgress
+          now={now}
+          start={FIRST.arriveUtc}
+          end={LAST.arriveUtc}
+          showZone={showZone}
+          onShowArrivals={openArrivals}
+        />
       </BottomSheet>
 
       <ModalSheet

@@ -1,6 +1,12 @@
 import { describe, test } from "vitest";
 import assert from "node:assert/strict";
-import { DEFAULT_HOME, parseStoredHome, serializeHome } from "./home";
+import {
+  DEFAULT_HOME,
+  HOME_BOOT_SCRIPT,
+  HOME_STORAGE_KEY,
+  parseStoredHome,
+  serializeHome,
+} from "./home";
 import { NEIGHBORHOODS } from "./neighborhoods";
 
 const byLabel = (label: string) => {
@@ -66,5 +72,35 @@ describe("우리 동네 저장 형식", () => {
     assert.equal(parseStoredHome(bad({ lat: 51.5 })), null); // 한국 밖
     assert.equal(parseStoredHome(bad({ lon: "126.9" })), null);
     assert.equal(parseStoredHome(bad({ lat: Number.NaN })), null);
+  });
+});
+
+describe("HOME_BOOT_SCRIPT: 첫 화면에 '동네를 골랐는가' 켜기", () => {
+  test("parseStoredHome이 읽을 수 있는 값일 때만 data-home=chosen", () => {
+    const good = JSON.parse(serializeHome(byLabel("화성시 병점구"))) as Record<string, unknown>;
+    const cases: (string | null)[] = [
+      null,
+      "",
+      "{",
+      "[]",
+      "null",
+      serializeHome(byLabel("서울 마포구")),
+      serializeHome(byLabel("화성시 병점구")), // 긴 새 id(kr-x-...)
+      JSON.stringify({ ...good, v: 2 }),
+      JSON.stringify({ ...good, id: "gn-1835848" }),
+      JSON.stringify({ ...good, id: "kr-a b" }),
+      JSON.stringify({ ...good, name: "" }),
+      JSON.stringify({ ...good, lat: 51.5 }),
+      JSON.stringify({ ...good, lon: "126.9" }),
+    ];
+    for (const raw of cases) {
+      const attrs: Record<string, string> = {};
+      new Function("localStorage", "document", HOME_BOOT_SCRIPT)(
+        { getItem: (k: string) => (k === HOME_STORAGE_KEY ? raw : null) },
+        { documentElement: { setAttribute: (k: string, v: string) => (attrs[k] = v) } },
+      );
+      const expected = parseStoredHome(raw) === null ? {} : { "data-home": "chosen" };
+      assert.deepEqual(attrs, expected, String(raw));
+    }
   });
 });

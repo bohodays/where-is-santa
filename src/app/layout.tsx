@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { HOME_BOOT_SCRIPT } from "@/lib/santa/home";
 import { SETTINGS_BOOT_SCRIPT } from "@/lib/santa/settings";
 import { fontVariables } from "./fonts";
 import "./globals.css";
@@ -21,8 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // 서버가 그린 <html>과 속성이 달라도 일부러 그런 것이라 경고하지 않게 한다(<html> 한 칸에만 적용된다)
     <html lang="ko" className={fontVariables} suppressHydrationWarning>
       <head>
-        {/* 설정(큰 글씨·고대비·움직임 줄이기)을 첫 화면을 그리기 전에 켠다. 뒤에 켜면 글자가 커지며 화면이 밀린다 */}
-        <script dangerouslySetInnerHTML={{ __html: SETTINGS_BOOT_SCRIPT }} />
+        {/*
+          설정(큰 글씨·고대비·움직임 줄이기)과 "동네를 골랐는가"를 첫 화면을 그리기 전에 <html> 속성으로 켠다.
+          뒤에 켜면 글자가 커지거나 안내가 사라지며 화면이 밀린다
+        */}
+        <script dangerouslySetInnerHTML={{ __html: SETTINGS_BOOT_SCRIPT + HOME_BOOT_SCRIPT }} />
       </head>
       <body>{children}</body>
     </html>

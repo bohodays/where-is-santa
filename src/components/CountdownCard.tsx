@@ -67,8 +67,12 @@ export function CountdownCard({
         <p className="whitespace-pre-wrap font-display text-countdown text-ink">{big}</p>
         <p className="whitespace-pre-wrap text-body text-ink-soft">{small}</p>
       </div>
-      {!homeChosen && onChangeHome && state !== null && (
-        <p className="mt-2 text-caption text-ink-soft">
+      {/*
+        동네를 고르지 않았을 때의 안내. 시각을 모르는 첫 화면에도 넣어 둔다(나중에 생기면 카드가 커지며 화면이 밀린다).
+        고른 사람은 서버 화면에서도 <html data-home="chosen">(첫 화면 스크립트)으로 처음부터 숨긴다(globals.css)
+      */}
+      {!homeChosen && (
+        <p className="hide-when-home-chosen mt-2 text-caption text-ink-soft">
           지금은 서울 기준이에요. 동네를 고르면 더 정확해요.
         </p>
       )}
