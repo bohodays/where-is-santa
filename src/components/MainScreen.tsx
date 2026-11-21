@@ -6,6 +6,7 @@ import { useHome } from "@/hooks/useHome";
 import { useMapTone } from "@/hooks/useMapTone";
 import { useNeighborhoods } from "@/hooks/useNeighborhoods";
 import { useRoute } from "@/hooks/useRoute";
+import { useSettings } from "@/hooks/useSettings";
 import { formatKstTime, needsKstLabel } from "@/lib/santa/format";
 import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { journeyPhase } from "@/lib/santa/santa";
@@ -13,13 +14,15 @@ import { ArrivalList } from "./ArrivalList";
 import { BottomSheet } from "./BottomSheet";
 import { Button } from "./Button";
 import { CountdownCard } from "./CountdownCard";
-import { ChevronRightIcon } from "./icons";
+import { IconButton } from "./IconButton";
+import { ChevronRightIcon, GearIcon } from "./icons";
 import { JourneyProgress } from "./JourneyProgress";
 import { loadMapLibrary, SantaMap } from "./map/SantaMap";
 import { ModalSheet } from "./ModalSheet";
 import { NeighborhoodPicker } from "./NeighborhoodPicker";
 import { NorthPoleScene } from "./NorthPoleScene";
 import { SantaLocationBanner } from "./SantaLocationBanner";
+import { SettingsPanel } from "./SettingsPanel";
 
 // 메인 화면(컨테이너). 현재 시각을 읽는 곳은 여기 한 곳이다(useNow). 아래 조각들은 now를 받아 보여주기만 한다.
 // 위: 출발 전·끝난 뒤는 북극 마을 그림, 여정 중에는 세계 지도(SantaMap) + 위치 알약.
@@ -39,8 +42,10 @@ export function MainScreen() {
   const onJourney = phase === "journey";
   const readClock = useClock();
   const { home, chosen, known, setHome } = useHome();
-  // 지도 밝기: 우리 동네 해에 맞춰 낮/밤(설정 화면이 생기면 "밝게"·"어둡게"도 받는다)
-  useMapTone(now, home);
+  const { settings, reduceMotion, deviceReducedMotion, update, setReduceMotion } = useSettings();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  // 지도 밝기: 설정이 "자동"이면 우리 동네 해에 맞춰 낮/밤, "밝게"·"어둡게"면 그대로
+  useMapTone(now, home, settings.mapTone);
   const soon = now !== null && phase !== "after" && now >= FIRST.arriveUtc - PRELOAD_MS;
   const [arrivalsOpen, setArrivalsOpen] = useState(false);
   // 전체 경로는 출발 직전, 또는 도착 순서를 열 때 받는다
@@ -72,15 +77,21 @@ export function MainScreen() {
             {route.status === "ready" && readClock && (
               <SantaMap route={route.route} readNow={readClock} home={home} />
             )}
-            <div className="absolute inset-x-4 top-5">
+          </div>
+        )}
+        {/* 맨 위 한 줄(시안): 왼쪽 위치 알약(여정 중), 오른쪽 설정 버튼(늘) */}
+        <div className="absolute inset-x-4 top-5 flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            {onJourney && (
               <SantaLocationBanner
                 now={now}
                 route={route.status === "ready" ? route.route : null}
                 loadFailed={route.status === "failed"}
               />
-            </div>
+            )}
           </div>
-        )}
+          <IconButton label="설정" icon={<GearIcon />} onClick={() => setSettingsOpen(true)} />
+        </div>
       </div>
 
       <BottomSheet aria-label="우리 동네까지 남은 시간" className="relative z-10 -mt-6">
@@ -127,6 +138,16 @@ export function MainScreen() {
           route={route.status === "ready" ? route.route : null}
           loadFailed={route.status === "failed"}
           homeId={home.id}
+        />
+      </ModalSheet>
+
+      <ModalSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} title="설정">
+        <SettingsPanel
+          settings={settings}
+          reduceMotion={reduceMotion}
+          deviceReducedMotion={deviceReducedMotion}
+          onChange={update}
+          onReduceMotionChange={setReduceMotion}
         />
       </ModalSheet>
 

@@ -28,10 +28,15 @@ export function NorthPoleScene({ phase, now, first, showZone = false }: NorthPol
         caption={before ? "북극 마을 · 선물 포장 중" : "북극 마을 · 쉬는 중"}
       />
       {/* 글자는 그림 위에 따로 둔다. 그림 속 글자(SVG text)는 크기가 화면 폭을 따라 변해 큰 글씨 모드가 듣지 않는다 */}
-      <div className="absolute inset-x-4 top-7 flex flex-col items-center gap-1 break-keep text-center">
+      {/*
+        오른쪽 위 설정 버튼(위 20px, 44×44px)에 글자가 가리지 않게(좁은 화면에서 큰 카운트다운이 버튼과 겹쳤다):
+        첫 줄은 버튼과 같은 높이의 줄(FIRST_ROW)에 두고 양옆을 비운다. 그 아래 글자는 버튼 아래에서 시작해 폭을 다 쓴다.
+        글자 덩어리를 통째로 내리거나 양옆을 다 비우면 작은 화면(320×568)에서 산타 그림까지 내려와서 쓰지 않았다
+      */}
+      <div className="absolute inset-x-4 top-5 flex flex-col items-center gap-1 break-keep text-center">
         {before ? (
           <>
-            <p className="text-body text-scene-text">산타 출발까지</p>
+            <p className={`${FIRST_ROW} text-body text-scene-text`}>산타 출발까지</p>
             <p className="whitespace-pre-wrap font-display text-countdown text-gold">
               {now === null ? " " : formatRemaining(first.arriveUtc - now)}
             </p>
@@ -43,7 +48,9 @@ export function NorthPoleScene({ phase, now, first, showZone = false }: NorthPol
           </>
         ) : (
           <>
-            <p className="font-display text-title text-gold">산타가 북극으로 돌아갔어요</p>
+            <p className={`${FIRST_ROW} font-display text-title text-gold`}>
+              산타가 북극으로 돌아갔어요
+            </p>
             <p className="text-caption text-scene-text-soft">내년 크리스마스이브에 또 만나요</p>
           </>
         )}
@@ -114,3 +121,6 @@ function VillageDrawing({ label, caption }: { label: string; caption: string }) 
     </svg>
   );
 }
+
+/** 설정 버튼과 같은 높이(44px 이상)의 첫 줄. 양옆 48px(버튼 44px + 사이 4px)을 비워 버튼과 겹치지 않는다 */
+const FIRST_ROW = "flex min-h-touch items-center px-12";

@@ -52,10 +52,11 @@
 - **스토리:** 설정, 닫기, 지도 위/시트 안.
 
 ### Switch
-- **역할:** 설정의 켜기/끄기(큰 글씨, 고대비, 움직임 줄이기, 소리).
+- **역할:** 설정의 켜기/끄기(큰 글씨, 고대비, 움직임 줄이기). 소리는 소리 기능을 만들 때(기획서 결정 2026-11-22).
 - **상태:** 켜짐(ink), 꺼짐(switch-off), 포커스, 설명 문구 있음("기기 설정을 따라 켜져 있어요").
 - **접근성:** `<button role="switch" aria-checked>`, 이름은 옆 글자로 `aria-labelledby`. 꺼짐 색은 흰 바탕과 3:1 이상(토큰 테스트가 검사).
 - **스토리:** 켜짐, 꺼짐, 설명 있음, 고대비 모드.
+- **구현(2026-11-22):** 한 줄(이름 + 설명 + 스위치)을 그린다. 누르는 칸 44px, 보이는 막대 52×32px. 켜짐/꺼짐은 색과 동그라미 위치로 알린다.
 
 ### SegmentedControl
 - **역할:** 하나만 고르는 짧은 선택지. 지도 밝기(자동·밝게·어둡게), 데모 시간 흐름(실제 속도·1초=1분·1초=10분).
@@ -176,15 +177,21 @@
   - **첫 화면:** 서버 렌더와 첫 화면은 저장 값을 모르므로 "우리 동네까지"로 그리고 "동네 고르기" 버튼은 저장 값을 읽은 뒤에 보인다(새로고침 때 잠깐 "서울 중구"가 보이지 않게).
 
 ### SettingsPanel
-- **역할:** 지도 밝기, 큰 글씨, 고대비, 움직임 줄이기, 소리, 출처.
+- **역할:** 지도 밝기, 큰 글씨, 고대비, 움직임 줄이기, 출처. 소리는 소리 기능을 만들 때 넣는다(누를 때 아무 일도 없는 스위치는 두지 않는다, 기획서 결정 2026-11-22).
 - **상태:** 기본값, 각 설정 켬. 움직임 줄이기는 기기 설정(`prefers-reduced-motion`)이 켜져 있으면 기본으로 켜짐.
 - **로직:** `useSettings`(localStorage). 설정은 `<html>` 속성(`data-map-tone`, `data-text-size`, `data-contrast`)으로 바로 반영한다(`docs/design-tokens.md`).
 - **스토리:** 기본, 모두 켬.
+- **구현(2026-11-22):**
+  - **열기:** 메인 오른쪽 위 설정 버튼(시안처럼 위치 알약 오른쪽, 출발 전·끝난 뒤에도 같은 자리). 북극 마을 장면은 첫 줄("산타 출발까지", "산타가 북극으로 돌아갔어요")을 버튼과 같은 높이 줄에 두고 양옆을 비운다. 그 아래 큰 카운트다운은 버튼 아래에서 시작한다(좁은 화면 320~360px에서 카운트다운이 버튼에 가려졌다).
+  - **저장(`useSettings`):** localStorage `where-is-santa:settings`에 `{v, mapTone, largeText, highContrast, reduceMotion}`. 칸마다 검사하고 틀린 칸만 기본값. 고른 동네와 같은 저장 도우미(`src/hooks/storedValue.ts`)를 쓴다.
+  - **움직임 줄이기:** 저장 값이 없으면(null) 기기 설정을 따른다. 기기와 다르게 바꾸면 그 값을 저장하고, 다시 기기와 같게 바꾸면 null로 돌아간다. 설명: "기기 설정을 따라 켜져 있어요", "기기 설정과 달리 꺼 두었어요".
+  - **첫 화면:** `SETTINGS_BOOT_SCRIPT`가 React보다 먼저 속성을 켠다(큰 글씨로 새로고침해도 글자가 나중에 커지지 않는다). 스크립트가 `settingsAttributes`와 같은 속성을 켜는지 테스트가 실제로 실행해 확인한다.
 
 ### AttributionBox
 - **역할:** 지도·데이터 출처 상자. OpenFreeMap, OpenMapTiles, OpenStreetMap 기여자, GeoNames, 국가데이터처 SGIS, Natural Earth.
 - **토큰:** `surface-muted`, `text-fine`, `link`.
 - **접근성:** 링크 글자 대비 4.5:1 이상(토큰 테스트가 검사). 줄 사이 간격을 넉넉히 둬 링크끼리 붙지 않게 한다.
+- **구현(2026-11-22):** 링크는 새 창으로 열고 화면 낭독기에 "(새 창)"을 읽힌다. 국가데이터처 SGIS는 링크 없이 이름만.
 
 ## 공유·데모 (5주차)
 
@@ -212,7 +219,7 @@
 | `matchChosung` | `src/lib/hangul.ts` | 초성 검색 | ✅ |
 | `searchNeighborhoods`·`nearestNeighborhoods` | `src/lib/santa/neighborhood-search.ts` | 동네 검색, 위치에서 가까운 시군구 3곳(처음 이름은 `nearestSigungu`) | ✅ |
 | `useHome` | `src/hooks/useHome.ts` | 고른 동네(localStorage, 저장 형식 검사는 `src/lib/santa/home.ts`) | ✅ |
-| `useSettings` | `src/hooks/` | 설정(localStorage) + `<html>` 속성 반영 | 3~4 |
+| `useSettings` | `src/hooks/useSettings.ts` | 설정(localStorage) + `<html>` 속성 반영. 저장 형식·속성은 `src/lib/santa/settings.ts` | ✅ |
 | `useMapTone` | `src/hooks/` | 설정 "자동"이면 우리 동네 해로 낮/밤 결정, `<html data-map-tone>`을 바꾼다. 지도는 속성이 바뀌면 색만 다시 칠한다(`colorPaint`) | ✅ |
 
 `src/lib/`는 순수 함수만(CLAUDE.md) — 시각은 인자로 받는다. 위 함수마다 테스트를 같은 커밋에 넣는다.
@@ -223,5 +230,5 @@
 2. ✅ **메인 글자 화면 (2026-11-21 완료):** `SantaLocationBanner`·`CountdownCard`·`JourneyProgress`로 `SantaStatus` 대체, 지도 자리에 `NorthPoleScene`. 지도 없이도 완성된 첫 화면(LCP 목표의 핵심). 공개 전 방문은 이 화면을 본다
 3. ✅ **경로 데이터 생성 스크립트 (2026-11-21 완료, `docs/data-route.md`):** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
 4. ✅ **지도 (2026-11-22 완료):** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
-5. **시트:** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestSigungu`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)
+5. ✅ **시트 (2026-11-22 완료):** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestNeighborhoods`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)
 6. **E2E:** Playwright로 시계를 고정해 이브 밤 흐름 확인(CLAUDE.md: 3주차부터)

@@ -211,9 +211,12 @@ html[data-text-size="large"] {
 
   /* 움직임 줄이기: 애니메이션을 아예 끈다. 시간만 0에 가깝게 하면 결과가 많을 때(128곳) 첫 한 프레임이 투명하게 그려졌다 */
   @media (prefers-reduced-motion: reduce) {
-    .list-enter {
+    html:not([data-motion="full"]) .list-enter {
       animation: none;
     }
+  }
+  html[data-motion="reduce"] .list-enter {
+    animation: none;
   }
 
   @keyframes list-enter {
@@ -240,16 +243,27 @@ body {
   font-family: var(--font-sans);
 }
 
+/*
+ * 움직임 줄이기. 두 곳에서 켜진다(docs/design-tokens.md):
+ * - 기기의 "동작 줄이기"(prefers-reduced-motion). 단, 설정에서 끈 사람(data-motion="full")은 빼고
+ * - 설정의 "움직임 줄이기"(data-motion="reduce")
+ * 자바스크립트로 움직이는 것(지도 이동)은 isMotionReduced()가 같은 규칙을 따른다(src/hooks/useSettings.ts).
+ * ::backdrop(시트 뒤 배경)은 *에 걸리지 않아 따로 적는다.
+ */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after,
+  html:not([data-motion="full"]) ::backdrop {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
 
-  /* ::backdrop은 *에 걸리지 않아 따로 적는다(시트 뒤 배경) */
-  ::backdrop {
-    transition-duration: 0.01ms !important;
-  }
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after,
+html[data-motion="reduce"] ::backdrop {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
 }
