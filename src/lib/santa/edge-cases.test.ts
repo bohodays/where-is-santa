@@ -11,7 +11,7 @@ import {
   wrapLongitude,
   type Stop,
 } from "./route";
-import { santaAt, DWELL_MS } from "./santa";
+import { santaAt, smoothLat, DWELL_MS } from "./santa";
 
 const HOUR = 3_600_000;
 const MIN = 60_000;
@@ -180,7 +180,8 @@ test("날짜변경선을 건너는 비행은 180도 근처로 지나간다 (지�
 // 2026-11-22 바꿈: 비행 중 산타는 두 도시 사이 최단 경로(대권) 대신 자정선 위에 있다.
 // 도착이 경도로만 정해져 남북으로 크게 튀는 구간이 많아서(실제 경로 660구간 중 141개가 3,000km 넘음),
 // 대권으로 날면 산타가 몇 초 만에 지도를 가로지른다. 자정선을 타면 늘 서쪽으로 천천히 움직이고 도착 순간에 정확히 그 도시에 닿는다.
-test("모든 구간에서 비행 중 산타는 자정선 위에 있고, 위도는 두 도시 사이를 진행률만큼 간다", () => {
+// 위도는 2026-11-22에 한 번 더 바꿈: 두 도시 사이를 진행률만큼 간 값을 가까운 위도끼리 5분 평균한 값(smoothLat, 도시가 촘촘한 한국에서 떨리지 않게)
+test("모든 구간에서 비행 중 산타는 자정선 위에 있고, 위도는 부드럽게 한 값(smoothLat)이다", () => {
   for (let i = 0; i + 1 < edgeRoute.length; i++) {
     const [from, to] = [edgeRoute[i], edgeRoute[i + 1]];
     const gap = to.arriveUtc - from.arriveUtc;
@@ -193,7 +194,7 @@ test("모든 구간에서 비행 중 산타는 자정선 위에 있고, 위도�
       assert.equal(pos.status, "flying");
       const lonGap = Math.abs(wrapLongitude(pos.lon - midnightLongitude(now, YEAR)));
       assert.ok(lonGap < 1e-9, `${from.name} → ${to.name}: 자정선과 ${lonGap}도 차이`);
-      const lat = from.lat + (to.lat - from.lat) * ratio;
+      const lat = smoothLat(now, edgeRoute);
       assert.ok(Math.abs(pos.lat - lat) < 1e-9, `${from.name} → ${to.name}: 위도 ${pos.lat}`);
     }
   }

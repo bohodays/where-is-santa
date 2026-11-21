@@ -15,7 +15,7 @@ const MIN = 60_000;
 
 test("요약의 첫 도착·마지막 도착·기본 동네가 전체 경로와 같다", () => {
   const show = (s: typeof first) =>
-    `{ id: "${s.id}", name: "${s.name}", lon: ${s.lon}, utcOffset: ${s.utcOffset} }`;
+    `{ id: "${s.id}", name: "${s.name}", lat: ${s.lat}, lon: ${s.lon}, utcOffset: ${s.utcOffset} }`;
   for (const [key, expected] of [
     ["first", first],
     ["last", last],
@@ -23,8 +23,8 @@ test("요약의 첫 도착·마지막 도착·기본 동네가 전체 경로와 
   ] as const) {
     const got = ROUTE_SUMMARY[key];
     assert.deepEqual(
-      { id: got.id, name: got.name, arriveUtc: got.arriveUtc },
-      { id: expected.id, name: expected.name, arriveUtc: expected.arriveUtc },
+      { id: got.id, name: got.name, lat: got.lat, arriveUtc: got.arriveUtc },
+      { id: expected.id, name: expected.name, lat: expected.lat, arriveUtc: expected.arriveUtc },
       `route-summary.ts의 ${key}를 ${show(expected)}로 고친다`,
     );
   }

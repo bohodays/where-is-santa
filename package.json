@@ -18,7 +18,9 @@
     "preview:route": "node --experimental-strip-types --no-warnings scripts/build-preview.ts",
     "predev": "node scripts/copy-maplibre-worker.mjs",
     "prebuild": "node scripts/copy-maplibre-worker.mjs",
+    "prestorybook": "node scripts/copy-maplibre-worker.mjs",
     "storybook": "storybook dev -p 6006",
+    "prebuild-storybook": "node scripts/copy-maplibre-worker.mjs",
     "build-storybook": "storybook build"
   },
   "dependencies": {
