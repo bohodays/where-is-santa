@@ -1,10 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CITIES } from "@/lib/santa/cities";
-import { buildRoute } from "@/lib/santa/route";
+import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { BottomSheet } from "./BottomSheet";
 import { NorthPoleScene } from "./NorthPoleScene";
 
-const ROUTE = buildRoute(CITIES, 2026);
 /** 한국 시각(KST)으로 적은 2026년 날짜를 epoch ms로 */
 const kst = (m: number, d: number, h: number, min = 0) => Date.UTC(2026, m - 1, d, h - 9, min);
 
@@ -12,8 +10,8 @@ const kst = (m: number, d: number, h: number, min = 0) => Date.UTC(2026, m - 1, 
 const meta = {
   title: "메인/NorthPoleScene",
   component: NorthPoleScene,
-  args: { phase: "before", route: ROUTE, now: kst(11, 21, 21) },
-  argTypes: { route: { control: false }, now: { control: "date" } },
+  args: { phase: "before", first: ROUTE_SUMMARY.first, now: kst(11, 21, 21) },
+  argTypes: { first: { control: false }, now: { control: "date" } },
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (

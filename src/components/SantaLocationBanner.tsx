@@ -8,11 +8,15 @@ import { santaAt } from "@/lib/santa/santa";
 type SantaLocationBannerProps = {
   /** 현재 시각(epoch ms). 아직 모르면(첫 렌더) null */
   now: number | null;
-  route: Stop[];
+  /** 전체 경로. 출발 직전에 따로 불러오므로(useRoute) 아직 없으면 null */
+  route: Stop[] | null;
+  /** 경로를 불러오지 못함(네트워크 끊김 등) */
+  loadFailed?: boolean;
 };
 
-export function SantaLocationBanner({ now, route }: SantaLocationBannerProps) {
-  const text = now === null ? null : describeSanta(santaAt(now, route), now);
+export function SantaLocationBanner({ now, route, loadFailed = false }: SantaLocationBannerProps) {
+  const text = now === null || route === null ? null : describeSanta(santaAt(now, route), now);
+  const waiting = loadFailed ? "산타 위치를 불러오지 못했어요" : "산타를 찾는 중…";
 
   return (
     <div className="flex flex-col items-start gap-1.5">
@@ -25,7 +29,7 @@ export function SantaLocationBanner({ now, route }: SantaLocationBannerProps) {
         className="inline-flex items-center gap-2 break-keep text-balance rounded-pill bg-surface px-3.5 py-2 text-body font-bold text-ink shadow-float"
       >
         <span aria-hidden="true" className="size-2 shrink-0 rounded-pill bg-santa" />
-        {text ? text.headline : "산타를 찾는 중…"}
+        {text ? text.headline : waiting}
       </p>
       {text?.detail && (
         <p className="break-keep pl-1.5 text-caption text-map-text">{text.detail}</p>

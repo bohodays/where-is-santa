@@ -33,6 +33,8 @@
 
 **`MainScreen`(클라이언트):** 현재 시각을 읽는 유일한 곳(`useNow`). `santaAt`의 상태로 위쪽을 고른다: 출발 전·끝난 뒤는 `NorthPoleScene`, 여정 중은 지도 자리 + `SantaLocationBanner`. 아래 고정형 시트에 `CountdownCard`와 `JourneyProgress`(출발 뒤부터). 시트·설정이 아직 없어서 "동네 바꾸기"·"도착 순서 보기"·설정 버튼은 그 동작이 연결될 때(순서 5번) 보인다. 기기 시간대가 한국과 다르면 `showZone`을 켠다.
 
+**경로 나눠 불러오기(2026-11-22):** 첫 화면(북극 마을, 카운트다운, 여정 막대)은 `ROUTE_SUMMARY`만 쓰고 단계는 `journeyPhase`로 정한다. 전체 경로는 출발 10분 전부터 `useRoute`(`src/hooks/useRoute.ts`)가 불러와 `SantaLocationBanner`(그리고 지도)에 넘긴다. 받는 동안 "산타를 찾는 중…", 실패하면 "산타 위치를 불러오지 못했어요"(카운트다운은 그대로).
+
 ## 기본 요소
 
 ### Button · LinkButton

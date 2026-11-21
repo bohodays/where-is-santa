@@ -34,3 +34,11 @@ export const FlyingNear: Story = {
 export const FlyingFar: Story = { name: "비행 중 (먼 도시)", args: { now: kst(25, 1, 30) } };
 export const After: Story = { name: "끝난 뒤", args: { now: kst(26, 0) } };
 export const Loading: Story = { name: "불러오는 중", args: { now: null } };
+export const RouteLoading: Story = {
+  name: "경로 받는 중 (출발 직전)",
+  args: { route: null },
+};
+export const LoadFailed: Story = {
+  name: "경로를 불러오지 못함",
+  args: { route: null, loadFailed: true },
+};

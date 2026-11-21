@@ -1,28 +1,30 @@
 import { formatKstTime } from "@/lib/santa/format";
-import type { Stop } from "@/lib/santa/route";
-import { journeyProgress } from "@/lib/santa/santa";
+import { progressBetween } from "@/lib/santa/santa";
 import { Button } from "./Button";
 import { ChevronRightIcon } from "./icons";
 
 // "산타의 여정 18%" 막대와 출발·끝 시각, "도착 순서 보기".
+// 전체 경로 없이 첫 도착·마지막 도착 시각만 받는다(첫 화면 JS를 가볍게, route-summary.ts).
 
 type JourneyProgressProps = {
   /** 현재 시각(epoch ms). 아직 모르면 null */
   now: number | null;
-  route: Stop[];
+  /** 첫 도착(출발) 시각 */
+  start: number;
+  /** 마지막 도착 시각 */
+  end: number;
   showZone?: boolean;
   onShowArrivals?: () => void;
 };
 
 export function JourneyProgress({
   now,
-  route,
+  start,
+  end,
   showZone = false,
   onShowArrivals,
 }: JourneyProgressProps) {
-  const percent = now === null ? null : Math.round(journeyProgress(now, route) * 100);
-  const first = route[0];
-  const last = route[route.length - 1];
+  const percent = now === null ? null : Math.round(progressBetween(now, start, end) * 100);
 
   return (
     <div className="flex flex-col gap-2">
@@ -50,10 +52,10 @@ export function JourneyProgress({
       >
         <div className="h-full rounded-pill bg-santa" style={{ width: `${percent ?? 0}%` }} />
       </div>
-      {now !== null && first && last && (
+      {now !== null && (
         <div className="flex justify-between gap-2 text-caption text-ink-soft">
-          <span>출발 {formatKstTime(first.arriveUtc, now, { showZone })}</span>
-          <span>끝 {formatKstTime(last.arriveUtc, now)}</span>
+          <span>출발 {formatKstTime(start, now, { showZone })}</span>
+          <span>끝 {formatKstTime(end, now)}</span>
         </div>
       )}
     </div>

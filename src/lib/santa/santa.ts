@@ -118,10 +118,31 @@ export function timeUntil(cityId: string, now: number, route: Stop[]): number {
 /** 전체 여정 진행률 0~1. 첫 도착이 0, 마지막 도착이 1 */
 export function journeyProgress(now: number, route: Stop[]): number {
   if (route.length === 0) return 0;
-  const start = route[0].arriveUtc;
-  const end = route[route.length - 1].arriveUtc;
+  return progressBetween(now, route[0].arriveUtc, route[route.length - 1].arriveUtc);
+}
+
+/**
+ * 진행률 0~1을 첫 도착(start)과 마지막 도착(end) 시각만으로 구한다.
+ * 첫 화면은 전체 경로 없이 요약(route-summary.ts)만 가지고 있어서 이걸 쓴다.
+ */
+export function progressBetween(now: number, start: number, end: number): number {
   if (start === end) return now < start ? 0 : 1; // 도시가 하나뿐이면 도착 전 0, 도착 뒤 1
   if (now <= start) return 0;
   if (now >= end) return 1;
   return (now - start) / (end - start);
+}
+
+/**
+ * 여정의 큰 단계: 출발 전 / 여정 중 / 끝남. 첫 도착과 마지막 도착 시각만으로 정한다.
+ * santaAt(now, route).status와 같은 결과다(before ↔ before, visiting·flying ↔ journey, after ↔ after).
+ * 마지막 도시에서도 DWELL_MS만큼 머문 뒤에 끝난다.
+ */
+export function journeyPhase(
+  now: number,
+  firstArriveUtc: number,
+  lastArriveUtc: number,
+): "before" | "journey" | "after" {
+  if (now < firstArriveUtc) return "before";
+  if (now < lastArriveUtc + DWELL_MS) return "journey";
+  return "after";
 }
