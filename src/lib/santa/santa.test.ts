@@ -69,11 +69,15 @@ test("출발 전에는 북극에서 대기", () => {
   assert.equal(s.next!.id, "kiritimati");
 });
 
+// 2026-11-22 바꿈: 위도는 부드럽게 한 값(smoothLat, 가까운 위도끼리 5분 평균)이라 도시가 촘촘하면 도시 위도와 조금 다르다(서울 옆에 인천·광주가 1분 안에 있다).
+// 그래서 위도는 "가까운가"만 보고, 경도는 머무는 동안 도시 그대로인지 본다
 test("서울 도착 10초 뒤에는 서울에서 배달 중", () => {
   const s = santaAt(stop("seoul").arriveUtc + 10_000, route);
   assert.equal(s.status, "visiting");
   assert.equal(s.prev!.id, "seoul");
-  assert.equal(s.lat, stop("seoul").lat);
+  assert.equal(s.lon, stop("seoul").lon);
+  // 샘플 경로는 대구·대전·광주·부산·제주가 5분 안에 있어 평균하면 36.5도(서울 37.6도). 화면에서 약 4px
+  assert.ok(Math.abs(s.lat - stop("seoul").lat) < 1.5, `위도 ${s.lat}`);
 });
 
 test("직전 도시를 떠나 서울로 가는 중간에는 두 도시 사이에 있다", () => {

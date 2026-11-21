@@ -7,7 +7,7 @@ import { arrivalUtc, effectiveLongitude } from "./route";
 
 export const ROUTE_YEAR = 2026;
 
-type SummaryStop = { id: string; name: string; lon: number; utcOffset: number };
+type SummaryStop = { id: string; name: string; lat: number; lon: number; utcOffset: number };
 
 /** 도착 시각은 좌표로 계산한다(도착 규칙은 route.ts 한 곳). 숫자를 그대로 적어 두지 않는다 */
 const withArrival = (s: SummaryStop) => ({
@@ -17,9 +17,27 @@ const withArrival = (s: SummaryStop) => ({
 
 export const ROUTE_SUMMARY = {
   /** 첫 도착(출발) */
-  first: withArrival({ id: "gn-4030939", name: "키리티마티", lon: -157.47502, utcOffset: 14 }),
+  first: withArrival({
+    id: "gn-4030939",
+    name: "키리티마티",
+    lat: 1.98487,
+    lon: -157.47502,
+    utcOffset: 14,
+  }),
   /** 마지막 도착 */
-  last: withArrival({ id: "gn-5881576", name: "파고파고", lon: -170.7025, utcOffset: -11 }),
+  last: withArrival({
+    id: "gn-5881576",
+    name: "파고파고",
+    lat: -14.27806,
+    lon: -170.7025,
+    utcOffset: -11,
+  }),
   /** 동네를 고르기 전 기본 동네 */
-  defaultHome: withArrival({ id: "kr-11020", name: "서울 중구", lon: 126.9959, utcOffset: 9 }),
+  defaultHome: withArrival({
+    id: "kr-11020",
+    name: "서울 중구",
+    lat: 37.5598,
+    lon: 126.9959,
+    utcOffset: 9,
+  }),
 };
