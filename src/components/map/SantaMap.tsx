@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { isMotionReduced } from "@/hooks/useSettings";
 import { ROUTE_YEAR } from "@/lib/santa/route-summary";
 import { midnightLongitude, type Stop } from "@/lib/santa/route";
 import { santaAt } from "@/lib/santa/santa";
@@ -56,8 +57,6 @@ function readMapColors(): MapColors {
     route: get("--map-route"),
   };
 }
-
-const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** 산타 표시(빨간 원 + 흰 고깔). 북극 마을 그림의 산타와 같은 모양 */
 function santaElement(): HTMLElement {
@@ -282,7 +281,7 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
     mapRef.current?.easeTo({
       center: [s.lon, START_LAT],
       zoom: 1,
-      duration: prefersReducedMotion() ? 0 : 800,
+      duration: isMotionReduced() ? 0 : 800, // 기기 설정 또는 설정의 움직임 줄이기
     });
   };
 

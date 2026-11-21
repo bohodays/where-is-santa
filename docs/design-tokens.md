@@ -16,7 +16,7 @@
 | `data-map-tone="day"` | 지도 밝기 "자동"에서 우리 동네 해 뜬 뒤~해 지기 전(동네가 없으면 서울), 또는 설정 "밝게" | `--map-*` 낮 지도 색 |
 | `data-text-size="large"` | 설정 "큰 글씨" | 기준 글자 16px → 18px. rem 단위 글자가 모두 커진다 |
 | `data-contrast="high"` | 설정 "고대비" | 보조 글자·테두리·지도 글자를 진하게(본문 7:1 이상) |
-| (`prefers-reduced-motion`) | 기기의 "동작 줄이기" 또는 설정 "움직임 줄이기" | 애니메이션 시간을 0에 가깝게 |
+| (`prefers-reduced-motion`), `data-motion="reduce"` | 기기의 "동작 줄이기" 또는 설정 "움직임 줄이기". 기기가 줄이기여도 설정에서 끄면 `data-motion="full"`이라 움직인다 | 애니메이션 시간을 0에 가깝게(목록 나타나기는 끈다). 지도 이동은 `isMotionReduced()`가 같은 규칙 |
 
 ## 색
 
@@ -106,7 +106,8 @@ MapLibre 스타일은 JS에서 색을 받으므로, 3주차 지도 구현 때 �
 
 `npm run storybook`(http://localhost:6006)으로 토큰과 컴포넌트를 본다. CI는 `npm run build-storybook`으로 스토리가 깨지지 않았는지 확인한다.
 
-- **모드 툴바:** 위쪽 툴바의 "지도(밤/낮)", "글자(보통/큰 글씨)", "대비(보통/고대비)"는 앱과 같은 `<html>` 속성을 켠다(`.storybook/preview.tsx`). 움직임 줄이기는 기기 설정(`prefers-reduced-motion`)을 따르므로 툴바에 없다.
+- **모드 툴바:** 위쪽 툴바의 "지도(밤/낮)", "글자(보통/큰 글씨)", "대비(보통/고대비)"는 앱과 같은 `<html>` 속성을 켠다(`.storybook/preview.tsx`). 움직임 줄이기는 기기 설정(`prefers-reduced-motion`)과 앱 설정(`data-motion`)을 따르므로 툴바에 없다.
+- **첫 화면:** 큰 글씨·고대비·움직임 줄이기는 `app/layout.tsx`의 짧은 스크립트(`SETTINGS_BOOT_SCRIPT`)가 React보다 먼저 `<html>`에 켠다. 지도 밝기는 시각과 동네가 필요해서 `useMapTone`이 켠다.
 - **접근성:** 아래 패널의 Accessibility 탭(axe)에 위반이 없어야 한다.
 - **스토리 위치:** 컴포넌트 스토리는 컴포넌트 옆(`src/components/X.stories.tsx`), 토큰처럼 컴포넌트가 아닌 문서는 `src/stories/`.
 - **글꼴:** 앱과 같은 `src/app/fonts.ts`를 쓴다.
