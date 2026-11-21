@@ -198,12 +198,12 @@
 | `describeSanta` | `src/lib/santa/` | 위치 문장("○○ 상공", "A에서 B로 가는 중"). 두 도시가 300km 이하면 "상공", 멀면 "가는 중" | 3~4 |
 | `nearbyStops` | `src/lib/santa/` | 도착 순서 목록에 보일 앞뒤 도시 | 3~4 |
 | `journeyProgress` | `src/lib/santa/` | 전체 여정 진행률 | 3~4 |
-| `sunTimes` | `src/lib/santa/` | 위도·경도·날짜로 해 뜨고 지는 시각(낮/밤 지도) | 3~4 |
+| `sunElevation`·`isDaytime`·`mapToneAt` | `src/lib/santa/sun.ts` | 태양 고도로 해가 떠 있는지(낮/밤 지도). 해 뜨는 시각 대신 고도를 직접 계산해 날짜 경계·극지방 문제가 없다(처음 이름은 `sunTimes`) | ✅ |
 | `matchChosung` | `src/lib/` (새 폴더 또는 santa 옆) | 초성 검색 | 3~4 |
 | `nearestSigungu` | `src/lib/santa/` | 위치에서 가장 가까운 시군구 | 3~4 |
 | `useHome` | `src/hooks/` | 고른 동네(localStorage) | 3~4 |
 | `useSettings` | `src/hooks/` | 설정(localStorage) + `<html>` 속성 반영 | 3~4 |
-| `useMapTone` | `src/hooks/` | 설정 "자동"이면 `sunTimes`로 낮/밤 결정 | 3~4 |
+| `useMapTone` | `src/hooks/` | 설정 "자동"이면 우리 동네 해로 낮/밤 결정, `<html data-map-tone>`을 바꾼다. 지도는 속성이 바뀌면 색만 다시 칠한다(`colorPaint`) | ✅ |
 
 `src/lib/`는 순수 함수만(CLAUDE.md) — 시각은 인자로 받는다. 위 함수마다 테스트를 같은 커밋에 넣는다.
 
@@ -212,6 +212,6 @@
 1. **로직과 기본 요소:** `formatRemaining`·`formatKstTime`·`describeSanta`·`journeyProgress` + `Button`·`IconButton`·`BottomSheet`
 2. ✅ **메인 글자 화면 (2026-11-21 완료):** `SantaLocationBanner`·`CountdownCard`·`JourneyProgress`로 `SantaStatus` 대체, 지도 자리에 `NorthPoleScene`. 지도 없이도 완성된 첫 화면(LCP 목표의 핵심). 공개 전 방문은 이 화면을 본다
 3. ✅ **경로 데이터 생성 스크립트 (2026-11-21 완료, `docs/data-route.md`):** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
-4. **지도:** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
+4. ✅ **지도 (2026-11-22 완료):** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
 5. **시트:** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestSigungu`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)
 6. **E2E:** Playwright로 시계를 고정해 이브 밤 흐름 확인(CLAUDE.md: 3주차부터)
