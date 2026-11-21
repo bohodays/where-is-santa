@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useClock, useNow } from "@/hooks/useNow";
+import { useHome } from "@/hooks/useHome";
 import { useMapTone } from "@/hooks/useMapTone";
+import { useNeighborhoods } from "@/hooks/useNeighborhoods";
 import { useRoute } from "@/hooks/useRoute";
 import { formatKstTime, needsKstLabel } from "@/lib/santa/format";
 import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
@@ -15,6 +17,7 @@ import { ChevronRightIcon } from "./icons";
 import { JourneyProgress } from "./JourneyProgress";
 import { loadMapLibrary, SantaMap } from "./map/SantaMap";
 import { ModalSheet } from "./ModalSheet";
+import { NeighborhoodPicker } from "./NeighborhoodPicker";
 import { NorthPoleScene } from "./NorthPoleScene";
 import { SantaLocationBanner } from "./SantaLocationBanner";
 
@@ -24,8 +27,9 @@ import { SantaLocationBanner } from "./SantaLocationBanner";
 // 아래: 고정형 시트에 우리 동네 카운트다운과 여정 막대.
 // 데모: 주소에 ?demo=2026-12-25T00:20:00%2B09:00&speed=60 을 붙이면 그 시각부터 흐른다(useNow).
 
-// 첫 화면은 경로 요약(첫 도착·마지막 도착·기본 동네)만 쓴다. 전체 경로(661곳)는 출발 직전에 불러온다(useRoute).
-const { first: FIRST, last: LAST, defaultHome: HOME } = ROUTE_SUMMARY;
+// 첫 화면은 경로 요약(첫 도착·마지막 도착)과 고른 동네(useHome, 이름·좌표째 저장)만 쓴다.
+// 전체 경로(661곳)는 출발 직전에(useRoute), 시군구 목록은 동네 고르기를 열 때(useNeighborhoods) 불러온다.
+const { first: FIRST, last: LAST } = ROUTE_SUMMARY;
 /** 출발 이만큼 전부터 전체 경로와 지도 JS를 미리 받아 둔다. 출발 순간 "산타를 찾는 중…"이 길게 보이지 않게 */
 const PRELOAD_MS = 10 * 60_000;
 
@@ -34,13 +38,16 @@ export function MainScreen() {
   const phase = now === null ? null : journeyPhase(now, FIRST.arriveUtc, LAST.arriveUtc);
   const onJourney = phase === "journey";
   const readClock = useClock();
+  const { home, chosen, known, setHome } = useHome();
   // 지도 밝기: 우리 동네 해에 맞춰 낮/밤(설정 화면이 생기면 "밝게"·"어둡게"도 받는다)
-  useMapTone(now, HOME);
+  useMapTone(now, home);
   const soon = now !== null && phase !== "after" && now >= FIRST.arriveUtc - PRELOAD_MS;
   const [arrivalsOpen, setArrivalsOpen] = useState(false);
   // 전체 경로는 출발 직전, 또는 도착 순서를 열 때 받는다
   const route = useRoute(soon || arrivalsOpen);
   const openArrivals = () => setArrivalsOpen(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const neighborhoods = useNeighborhoods(pickerOpen);
   // 지도 JS(약 1MB)도 출발 전에 미리 받아 둔다. 실패해도 여기서는 조용히 넘기고, 지도를 그릴 때 다시 시도한다
   useEffect(() => {
     if (soon) loadMapLibrary().catch(() => {});
@@ -63,7 +70,7 @@ export function MainScreen() {
         {onJourney && (
           <div className="absolute inset-0 bg-map-sea">
             {route.status === "ready" && readClock && (
-              <SantaMap route={route.route} readNow={readClock} home={HOME} />
+              <SantaMap route={route.route} readNow={readClock} home={home} />
             )}
             <div className="absolute inset-x-4 top-5">
               <SantaLocationBanner
@@ -79,10 +86,12 @@ export function MainScreen() {
       <BottomSheet aria-label="우리 동네까지 남은 시간" className="relative z-10 -mt-6">
         <CountdownCard
           now={now}
-          homeName={HOME.name}
-          arriveUtc={HOME.arriveUtc}
-          homeChosen={false}
+          homeName={known ? home.name : null}
+          arriveUtc={home.arriveUtc}
+          homeChosen={chosen}
           showZone={showZone}
+          // 고른 동네를 읽기 전에는 버튼 글자("고르기"/"바꾸기")를 모르므로 내지 않는다. 자리 높이는 그대로다
+          onChangeHome={known ? () => setPickerOpen(true) : undefined}
         />
         {phase !== null && phase !== "before" && (
           <JourneyProgress
@@ -117,7 +126,22 @@ export function MainScreen() {
           now={now}
           route={route.status === "ready" ? route.route : null}
           loadFailed={route.status === "failed"}
-          homeId={HOME.id}
+          homeId={home.id}
+        />
+      </ModalSheet>
+
+      <ModalSheet open={pickerOpen} onClose={() => setPickerOpen(false)} title="우리 동네 고르기">
+        <NeighborhoodPicker
+          now={now}
+          home={home}
+          chosen={chosen}
+          neighborhoods={neighborhoods.status === "ready" ? neighborhoods.neighborhoods : null}
+          loadFailed={neighborhoods.status === "failed"}
+          // 고르면 바로 저장하고 닫는다. 카운트다운·도착 순서·지도가 새 동네로 바뀐다
+          onPick={(n) => {
+            setHome(n);
+            setPickerOpen(false);
+          }}
         />
       </ModalSheet>
     </main>

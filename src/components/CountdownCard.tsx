@@ -8,8 +8,8 @@ import { Button } from "./Button";
 type CountdownCardProps = {
   /** 현재 시각(epoch ms). 아직 모르면(서버 렌더, 첫 렌더) null */
   now: number | null;
-  /** 동네 이름. 예) "서울 마포구" */
-  homeName: string;
+  /** 동네 이름. 예) "서울 마포구". 고른 동네를 아직 읽지 못했으면(서버 렌더·첫 화면) null → "우리 동네까지" */
+  homeName: string | null;
   /** 그 동네 도착 시각(epoch ms) */
   arriveUtc: number;
   /** 사람이 직접 고른 동네인가. false면 기본값(서울)이라 "동네 고르기"를 강조한다 */
@@ -51,7 +51,7 @@ export function CountdownCard({
     <div className="flex flex-col break-keep">
       {/* 버튼이 없어도 줄 높이는 버튼(44px)과 같게 둔다. 나중에 버튼이 붙어도 화면이 밀리지 않는다 */}
       <div className="flex min-h-touch items-center justify-between gap-2">
-        <h2 className="text-body text-ink-soft">{homeName}까지</h2>
+        <h2 className="text-body text-ink-soft">{homeName ?? "우리 동네"}까지</h2>
         {/* 동네 고르기 시트가 연결됐을 때만 버튼을 보인다. 눌러도 아무 일이 없는 버튼은 내지 않는다 */}
         {onChangeHome && (
           <Button

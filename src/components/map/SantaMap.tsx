@@ -101,6 +101,12 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
   const followRef = useRef(true);
   const [mode, setMode] = useState<MapMode>("loading");
   const [follow, setFollow] = useState(true);
+  // 우리 동네 표시. 동네를 바꾸면 지도를 다시 만들지 않고 표시만 옮긴다(아래 두 번째 effect)
+  const homeRef = useRef(home);
+  homeRef.current = home;
+  const homeMarkerRef = useRef<{ marker: import("maplibre-gl").Marker; label: HTMLElement } | null>(
+    null,
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -208,9 +214,14 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
         setFollow(false);
       });
 
-      new lib.Marker({ element: homeElement(home.name), anchor: "top" })
-        .setLngLat([home.lon, home.lat])
-        .addTo(map);
+      const startHome = homeRef.current;
+      const homeEl = homeElement(startHome.name);
+      homeMarkerRef.current = {
+        marker: new lib.Marker({ element: homeEl, anchor: "top" })
+          .setLngLat([startHome.lon, startHome.lat])
+          .addTo(map),
+        label: homeEl.lastElementChild as HTMLElement,
+      };
       const santa = new lib.Marker({ element: santaElement() })
         .setLngLat([start.lon, clampLat(start.lat)])
         .addTo(map);
@@ -251,8 +262,18 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
       window.clearTimeout(timer);
       mapRef.current?.remove();
       mapRef.current = null;
+      homeMarkerRef.current = null;
     };
-  }, [route, readNow, home, forceMode]);
+  }, [route, readNow, forceMode]);
+
+  // 동네가 바뀌면 표시만 옮기고 이름을 바꾼다. 지도가 아직 없으면 지도를 만들 때 homeRef의 새 값을 쓴다
+  const { name: homeName, lat: homeLat, lon: homeLon } = home;
+  useEffect(() => {
+    const shown = homeMarkerRef.current;
+    if (!shown) return;
+    shown.marker.setLngLat([homeLon, homeLat]);
+    shown.label.textContent = homeName; // textContent: 이름을 글자로만 넣는다
+  }, [homeName, homeLat, homeLon]);
 
   const followSanta = () => {
     followRef.current = true;

@@ -58,3 +58,32 @@ export function ChevronRightIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** 돋보기(검색). Lucide "search" */
+export function SearchIcon(props: IconProps) {
+  return (
+    <Icon width={20} height={20} {...props}>
+      <path d="m21 21-4.34-4.34" />
+      <circle cx="11" cy="11" r="8" />
+    </Icon>
+  );
+}
+
+/** 위치 핀(내 위치로 찾기). Lucide "map-pin" */
+export function MapPinIcon(props: IconProps) {
+  return (
+    <Icon width={20} height={20} {...props}>
+      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+      <circle cx="12" cy="10" r="3" />
+    </Icon>
+  );
+}
+
+/** 체크(고른 항목). Lucide "check" */
+export function CheckIcon(props: IconProps) {
+  return (
+    <Icon strokeWidth={2.5} {...props}>
+      <path d="M20 6 9 17l-5-5" />
+    </Icon>
+  );
+}

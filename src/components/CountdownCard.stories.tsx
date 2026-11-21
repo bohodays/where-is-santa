@@ -36,7 +36,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Loading: Story = { name: "불러오는 중", args: { now: null } };
+export const Loading: Story = {
+  name: "불러오는 중 (시각·고른 동네를 읽기 전)",
+  args: { now: null, homeName: null },
+};
 export const NotChosen: Story = {
   name: "동네 안 고름 (서울 기준)",
   args: { homeName: "서울", homeChosen: false, now: kst(11, 19, 21) },
