@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useClock, useNow } from "@/hooks/useNow";
 import { useMapTone } from "@/hooks/useMapTone";
 import { useRoute } from "@/hooks/useRoute";
-import { needsKstLabel } from "@/lib/santa/format";
+import { formatKstTime, needsKstLabel } from "@/lib/santa/format";
 import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { journeyPhase } from "@/lib/santa/santa";
+import { ArrivalList } from "./ArrivalList";
 import { BottomSheet } from "./BottomSheet";
+import { Button } from "./Button";
 import { CountdownCard } from "./CountdownCard";
+import { ChevronRightIcon } from "./icons";
 import { JourneyProgress } from "./JourneyProgress";
 import { loadMapLibrary, SantaMap } from "./map/SantaMap";
+import { ModalSheet } from "./ModalSheet";
 import { NorthPoleScene } from "./NorthPoleScene";
 import { SantaLocationBanner } from "./SantaLocationBanner";
 
@@ -33,7 +37,10 @@ export function MainScreen() {
   // 지도 밝기: 우리 동네 해에 맞춰 낮/밤(설정 화면이 생기면 "밝게"·"어둡게"도 받는다)
   useMapTone(now, HOME);
   const soon = now !== null && phase !== "after" && now >= FIRST.arriveUtc - PRELOAD_MS;
-  const route = useRoute(soon);
+  const [arrivalsOpen, setArrivalsOpen] = useState(false);
+  // 전체 경로는 출발 직전, 또는 도착 순서를 열 때 받는다
+  const route = useRoute(soon || arrivalsOpen);
+  const openArrivals = () => setArrivalsOpen(true);
   // 지도 JS(약 1MB)도 출발 전에 미리 받아 둔다. 실패해도 여기서는 조용히 넘기고, 지도를 그릴 때 다시 시도한다
   useEffect(() => {
     if (soon) loadMapLibrary().catch(() => {});
@@ -83,9 +90,36 @@ export function MainScreen() {
             start={FIRST.arriveUtc}
             end={LAST.arriveUtc}
             showZone={showZone}
+            onShowArrivals={openArrivals}
           />
         )}
+        {/* 출발 전에는 여정 막대가 없으므로 도착 순서(예정 목록) 버튼만 둔다 */}
+        {phase === "before" && (
+          <Button variant="quiet" className="self-end no-underline" onClick={openArrivals}>
+            도착 순서 보기
+            <ChevronRightIcon />
+          </Button>
+        )}
       </BottomSheet>
+
+      <ModalSheet
+        open={arrivalsOpen}
+        onClose={() => setArrivalsOpen(false)}
+        title="산타의 도착 순서"
+        subtitle={
+          phase === "before" && now !== null
+            ? `한국 시각 기준 · ${formatKstTime(FIRST.arriveUtc, now)} 출발 예정`
+            : "한국 시각 기준"
+        }
+      >
+        {/* ModalSheet가 열려 있을 때(와 닫히며 내려가는 동안)만 그린다 */}
+        <ArrivalList
+          now={now}
+          route={route.status === "ready" ? route.route : null}
+          loadFailed={route.status === "failed"}
+          homeId={HOME.id}
+        />
+      </ModalSheet>
     </main>
   );
 }

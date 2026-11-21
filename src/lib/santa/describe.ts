@@ -49,13 +49,27 @@ export function withRo(name: string): string {
   return jong === 0 || jong === JONG_RIEUL ? `${name}로` : `${name}으로`;
 }
 
-/** "19분 뒤". 1분이 안 남으면 "곧"("1분 이내 뒤"는 어색하다) */
-function untilText(ms: number): string {
+/** "19분 뒤". 1분이 안 남으면 "곧"("1분 이내 뒤"는 어색하다). 도착 순서 목록(ArrivalList)도 쓴다 */
+export function untilText(ms: number): string {
   return ms < MIN ? "곧" : `${formatRemaining(ms)} 뒤`;
 }
 
-export function describeSanta(santa: SantaState, now: number): SantaDescription {
+/**
+ * 여정 중 산타가 있는 곳을 짧게: "부산 상공", "부산에서 선물 배달 중", "대구에서 베이징으로 가는 중".
+ * 위치 알약은 앞에 "지금 산타는"을 붙이고, 도착 순서 목록의 "지금" 줄은 이것만 쓴다. 여정 밖(출발 전·끝난 뒤)이면 null
+ */
+export function santaPlace(santa: SantaState): string | null {
   const { status, prev, next } = santa;
+  if (status === "before" || status === "after" || !prev) return null;
+  if (status === "visiting" || !next) return `${prev.name}에서 선물 배달 중`;
+  // 비행 중
+  if (distanceKm(prev, next) > NEAR_KM) return `${prev.name}에서 ${withRo(next.name)} 가는 중`;
+  const nearer = santa.progress < 0.5 ? prev : next;
+  return `${nearer.name} 상공`;
+}
+
+export function describeSanta(santa: SantaState, now: number): SantaDescription {
+  const { status, next } = santa;
 
   if (status === "before") {
     return {
@@ -63,22 +77,12 @@ export function describeSanta(santa: SantaState, now: number): SantaDescription 
       detail: next ? `첫 도착: ${next.name}, ${untilText(next.arriveUtc - now)}` : null,
     };
   }
-  if (status === "after" || !prev) {
+  const place = santaPlace(santa);
+  if (place === null) {
     return { headline: "산타는 북극으로 돌아갔어요", detail: null };
   }
-
   const detail = next
     ? `다음 도착: ${next.name}, ${untilText(next.arriveUtc - now)}`
     : "마지막 도시예요";
-
-  if (status === "visiting" || !next) {
-    return { headline: `지금 산타는 ${prev.name}에서 선물 배달 중`, detail };
-  }
-
-  // 비행 중
-  if (distanceKm(prev, next) > NEAR_KM) {
-    return { headline: `지금 산타는 ${prev.name}에서 ${withRo(next.name)} 가는 중`, detail };
-  }
-  const nearer = santa.progress < 0.5 ? prev : next;
-  return { headline: `지금 산타는 ${nearer.name} 상공`, detail };
+  return { headline: `지금 산타는 ${place}`, detail };
 }

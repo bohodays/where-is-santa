@@ -146,16 +146,27 @@ html[data-text-size="large"] {
     color: var(--color-ink);
     box-shadow: var(--shadow-sheet);
     transform: translateY(100%);
-    transition: transform 0.25s ease-out;
-    /* 닫힐 때도 내려가는 애니메이션이 보이게(지원하는 브라우저만). 모르는 브라우저는 윗줄을 쓰고 바로 사라진다 */
+    /*
+     * 닫힐 때(이 규칙): 천천히 출발해 빨라지는 곡선. ease-out으로 닫으면 처음 0.1초에 절반 넘게 사라지고
+     * 천천히 멈추는 끝부분은 화면 밖이라 안 보여서 "툭" 떨어져 보였다(2026-11-21).
+     * overlay·display: 닫히는 동안에도 화면에 남아 내려가는 모습이 보이게(지원하는 브라우저만).
+     * 모르는 브라우저는 윗줄을 쓰고 바로 사라진다.
+     */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1);
     transition:
-      transform 0.25s ease-out,
-      overlay 0.25s allow-discrete,
-      display 0.25s allow-discrete;
+      transform 0.3s cubic-bezier(0.4, 0, 1, 1),
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
   }
 
+  /* 열릴 때(이 규칙): 빠르게 올라와 끝에서 부드럽게 멈추는 곡선 */
   .modal-sheet[open] {
     transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+    transition:
+      transform 0.3s cubic-bezier(0.2, 0, 0, 1),
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
   }
 
   /* 열리는 첫 순간의 모양. 여기서 [open] 모양으로 미끄러져 올라온다. 움직임 줄이기면 아래 규칙이 시간을 0에 가깝게 만든다 */
@@ -170,6 +181,23 @@ html[data-text-size="large"] {
       5 10 22 / 0.55
     ); /* 옛 브라우저는 ::backdrop에서 CSS 변수를 못 읽어서 같은 값을 먼저 적는다 */
     background: var(--color-backdrop);
+    /* 뒤 배경도 시트와 같은 시간 동안 서서히 어두워지고 밝아진다 */
+    opacity: 0;
+    transition: opacity 0.3s linear;
+    transition:
+      opacity 0.3s linear,
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
+  }
+
+  .modal-sheet[open]::backdrop {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .modal-sheet[open]::backdrop {
+      opacity: 0;
+    }
   }
 
   /* 시트가 열려 있는 동안 뒤 화면이 스크롤되지 않게 */
@@ -194,6 +222,11 @@ body {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* ::backdrop은 *에 걸리지 않아 따로 적는다(시트 뒤 배경) */
+  ::backdrop {
     transition-duration: 0.01ms !important;
   }
 }
