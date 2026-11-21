@@ -9,6 +9,7 @@ import { Button } from "../Button";
 import { MapAttribution } from "./MapAttribution";
 import {
   clampLat,
+  colorPaint,
   midnightLine,
   outlineStyle,
   tileStyle,
@@ -111,6 +112,7 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
     let cancelled = false;
     let raf = 0;
     let timer = 0;
+    let watchTone: MutationObserver | null = null;
 
     void (async () => {
       let lib: typeof import("maplibre-gl");
@@ -123,7 +125,7 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
       if (cancelled) return;
 
       lib.setWorkerUrl(`/maplibre/maplibre-gl-worker-${lib.getVersion()}.js`);
-      const colors = readMapColors();
+      let colors = readMapColors();
       let current: "tiles" | "outline" = forceMode === "outline" ? "outline" : "tiles";
       const start = santaAt(readNow(), route);
       const map = new lib.Map({
@@ -176,6 +178,20 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
         });
       }
 
+      // 낮/밤 지도(<html data-map-tone>)나 고대비가 바뀌면 지도를 다시 만들지 않고 색만 바꾼다(useMapTone이 속성을 바꾼다)
+      const recolor = () => {
+        colors = readMapColors();
+        if (!map.isStyleLoaded()) return;
+        for (const [id, property, value] of colorPaint(current, colors)) {
+          map.setPaintProperty(id, property, value);
+        }
+      };
+      watchTone = new MutationObserver(recolor);
+      watchTone.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-map-tone", "data-contrast"],
+      });
+
       // 스타일을 (다시) 읽을 때마다 자정선·들른 도시 데이터를 처음부터 넣는다.
       // 타일 지도는 첫 타일이 와야 "tiles"(위), 윤곽 지도는 스타일을 읽으면 바로 "outline"
       let shownVisited = -1;
@@ -183,6 +199,7 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
       map.on("style.load", () => {
         shownVisited = -1;
         lineAt = 0;
+        recolor(); // 스타일을 읽는 사이 낮/밤이 바뀌었을 수도 있다
         if (current === "outline") setMode("outline");
       });
       // 사람이 지도를 끌면 따라가기를 멈춘다. 다시 켜는 버튼이 나온다
@@ -230,6 +247,7 @@ export function SantaMap({ route, readNow, home, forceMode }: SantaMapProps) {
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      watchTone?.disconnect();
       window.clearTimeout(timer);
       mapRef.current?.remove();
       mapRef.current = null;

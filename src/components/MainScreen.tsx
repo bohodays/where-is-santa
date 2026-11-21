@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useClock, useNow } from "@/hooks/useNow";
+import { useMapTone } from "@/hooks/useMapTone";
 import { useRoute } from "@/hooks/useRoute";
 import { needsKstLabel } from "@/lib/santa/format";
 import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
@@ -29,6 +30,8 @@ export function MainScreen() {
   const phase = now === null ? null : journeyPhase(now, FIRST.arriveUtc, LAST.arriveUtc);
   const onJourney = phase === "journey";
   const readClock = useClock();
+  // 지도 밝기: 우리 동네 해에 맞춰 낮/밤(설정 화면이 생기면 "밝게"·"어둡게"도 받는다)
+  useMapTone(now, HOME);
   const soon = now !== null && phase !== "after" && now >= FIRST.arriveUtc - PRELOAD_MS;
   const route = useRoute(soon);
   // 지도 JS(약 1MB)도 출발 전에 미리 받아 둔다. 실패해도 여기서는 조용히 넘기고, 지도를 그릴 때 다시 시도한다

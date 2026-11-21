@@ -4,6 +4,7 @@ import { buildRoute } from "@/lib/santa/route";
 import { CITIES } from "@/lib/santa/cities";
 import {
   clampLat,
+  colorPaint,
   midnightLine,
   outlineStyle,
   tileStyle,
@@ -41,6 +42,41 @@ describe("지도 스타일", () => {
   test("색은 넘겨준 토큰 값을 그대로 쓴다", () => {
     const text = JSON.stringify(tileStyle(COLORS));
     for (const color of Object.values(COLORS)) assert.ok(text.includes(color), color);
+  });
+});
+
+describe("낮/밤 다시 칠하기", () => {
+  const DAY: MapColors = { sea: "#d9e6e6", land: "#fbf7ee", landLine: "#c9bfa9", route: "#c23a30" };
+
+  test.each(["tiles", "outline"] as const)(
+    "%s: 다시 칠한 색이 처음부터 낮 색으로 만든 스타일과 같다",
+    (mode) => {
+      const style = mode === "tiles" ? tileStyle(DAY) : outlineStyle(DAY);
+      for (const [id, property, value] of colorPaint(mode, DAY)) {
+        const layer = style.layers.find((l) => l.id === id);
+        assert.ok(layer, `${mode}에 ${id} 레이어가 없음`);
+        assert.equal(
+          (layer.paint as Record<string, unknown>)[property],
+          value,
+          `${id} ${property}`,
+        );
+      }
+    },
+  );
+
+  test.each(["tiles", "outline"] as const)("%s: 색이 있는 레이어는 모두 다시 칠한다", (mode) => {
+    const style = mode === "tiles" ? tileStyle(DAY) : outlineStyle(DAY);
+    const painted = new Set(colorPaint(mode, DAY).map(([id, property]) => `${id} ${property}`));
+    for (const layer of style.layers) {
+      for (const [property, value] of Object.entries(layer.paint ?? {})) {
+        if (property.endsWith("color")) {
+          assert.ok(
+            painted.has(`${layer.id} ${property}`),
+            `${layer.id} ${property} (${String(value)})`,
+          );
+        }
+      }
+    }
   });
 });
 

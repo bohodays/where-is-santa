@@ -1,4 +1,4 @@
-import type { StyleSpecification } from "maplibre-gl";
+import type { Map as MapLibreMap, StyleSpecification } from "maplibre-gl";
 import type { Stop } from "@/lib/santa/route";
 
 // 지도 스타일과 지도 위에 그리는 데이터. 순수 함수만 둔다(테스트: mapStyle.test.ts).
@@ -105,6 +105,36 @@ export function outlineStyle(colors: MapColors): StyleSpecification {
       ...top.layers,
     ],
   };
+}
+
+/**
+ * 낮/밤 지도가 바뀔 때 다시 칠할 레이어 색 [레이어 id, 속성, 값]. 지도를 다시 만들지 않고 색만 바꾼다(setPaintProperty).
+ * 스타일을 만드는 함수(tileStyle·outlineStyle)와 같은 색을 쓰는지 mapStyle.test.ts가 검사한다.
+ */
+/** MapLibre가 아는 칠하기 속성 이름("fill-color" 등). 철자가 틀리면 타입 검사에서 걸린다 */
+type PaintProperty = Parameters<MapLibreMap["setPaintProperty"]>[1];
+type Paint = [layerId: string, property: PaintProperty, value: string];
+
+export function colorPaint(mode: "tiles" | "outline", colors: MapColors): Paint[] {
+  const overlay: Paint[] = [
+    ["midnight-line", "line-color", colors.route],
+    ["visited-dots", "circle-color", colors.route],
+  ];
+  if (mode === "tiles") {
+    return [
+      ["land", "background-color", colors.land],
+      ["water", "fill-color", colors.sea],
+      ["border", "line-color", colors.landLine],
+      ["border-disputed", "line-color", colors.landLine],
+      ...overlay,
+    ];
+  }
+  return [
+    ["sea", "background-color", colors.sea],
+    ["land", "fill-color", colors.land],
+    ["land", "fill-outline-color", colors.landLine],
+    ...overlay,
+  ];
 }
 
 /** 자정선: 그 경도의 세로선(남위 85도 ~ 북위 85도) */
