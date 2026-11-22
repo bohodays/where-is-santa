@@ -6,11 +6,21 @@ import { santaAt, timeUntil } from "./santa";
 import {
   MAX_ROUND_TRIP_MS,
   MIN_OFFSET_MS,
+  DEMO_BOOT_SCRIPT,
+  DEMO_LEAD_MS,
   clockNow,
+  demoOffered,
+  demoSearch,
+  demoSpeedLabel,
   estimateClockOffset,
+  nearestDemoSpeed,
   parseClockConfig,
+  retimeDemoClock,
+  startDemoClock,
+  toKstIso,
   withOffset,
 } from "./clock";
+import { ROUTE_SUMMARY } from "./route-summary";
 
 const SEC = 1_000;
 const MIN = 60_000;
@@ -139,4 +149,98 @@ test("기기 시계가 10분 느린 폰에서도 보정하면 산타 위치와 �
     Math.abs(timeUntil("seoul", corrected, route) - timeUntil("seoul", trueNow, route)) <= SEC,
   );
   assert.equal(santaAt(corrected, route).next?.id, santaAt(trueNow, route).next?.id);
+});
+
+// ---- 데모 모드: 시간 이동, 배속 바꾸기, 주소 ----
+
+test("이브 밤으로 시간 이동: 우리 동네 도착 20분 전부터 1초=1분이면 20초 뒤 도착", () => {
+  const arrive = kst(12, 24, 23, 50);
+  const config = startDemoClock(arrive, 60, 5_000);
+  assert.equal(DEMO_LEAD_MS, 20 * MIN);
+  assert.equal(clockNow(config, 5_000), arrive - 20 * MIN);
+  assert.equal(clockNow(config, 5_000 + 20 * SEC), arrive);
+});
+
+test("배속을 바꿔도 데모 시각이 튀지 않고 이어서 흐른다", () => {
+  const start = startDemoClock(kst(12, 24, 23, 50), 60, 0);
+  const at = 10 * SEC; // 실제로 10초 지남 → 데모로 10분 지남
+  const before = clockNow(start, at);
+  const faster = retimeDemoClock(start, 600, at);
+  assert.equal(clockNow(faster, at), before);
+  assert.equal(clockNow(faster, at + SEC), before + 10 * MIN);
+  // 실제 모드는 그대로
+  const real = { mode: "real", offsetMs: 300 } as const;
+  assert.equal(retimeDemoClock(real, 600, at), real);
+});
+
+test("toKstIso: 한국 시각 ISO, 초 단위 버림, 다시 읽으면 같은 시각", () => {
+  const t = kst(12, 24, 23, 46, 5) + 999;
+  assert.equal(toKstIso(t), "2026-12-24T23:46:05+09:00");
+  assert.equal(Date.parse(toKstIso(t)), t - 999);
+  assert.equal(toKstIso(kst(12, 25, 0, 0)), "2026-12-25T00:00:00+09:00");
+});
+
+test("demoSearch: 데모는 지금 데모 시각과 배속을 쓰고, 실제는 지운다. 다른 검색어는 둔다", () => {
+  const config = startDemoClock(kst(12, 24, 23, 50), 60, 0);
+  const search = demoSearch("?ref=share", config, 30 * SEC); // 23:30에서 데모로 30분 지남
+  const params = new URLSearchParams(search);
+  assert.equal(params.get("ref"), "share");
+  assert.equal(params.get("demo"), "2026-12-25T00:00:00+09:00");
+  assert.equal(params.get("speed"), "60");
+  // 쓴 주소를 다시 읽으면 같은 시각·배속의 데모 시계
+  const again = parseClockConfig(search, 0);
+  assert.equal(again.mode, "demo");
+  assert.equal(clockNow(again, 0), clockNow(config, 30 * SEC));
+
+  const real = { mode: "real", offsetMs: 0 } as const;
+  assert.equal(demoSearch(search, real, 0), "?ref=share");
+  assert.equal(demoSearch("?demo=2026-12-25T00:20:00%2B09:00&speed=60", real, 0), "");
+});
+
+test("nearestDemoSpeed·demoSpeedLabel: 선택지 밖 배속은 가까운 선택지로", () => {
+  assert.equal(nearestDemoSpeed(1), 1);
+  assert.equal(nearestDemoSpeed(60), 60);
+  assert.equal(nearestDemoSpeed(30), 60);
+  assert.equal(nearestDemoSpeed(5), 1);
+  assert.equal(nearestDemoSpeed(3600), 600);
+  assert.equal(demoSpeedLabel(60), "1초 = 1분");
+  assert.equal(demoSpeedLabel(600), "1초 = 10분");
+  assert.equal(demoSpeedLabel(1), "실제 속도");
+  assert.equal(demoSpeedLabel(30), "30배 빠르게");
+});
+
+test("demoOffered: 진짜 이브(출발 24시간 전~여정 끝)에는 권하지 않는다", () => {
+  const depart = ROUTE_SUMMARY.first.arriveUtc;
+  const end = ROUTE_SUMMARY.last.arriveUtc;
+  const real = { mode: "real", offsetMs: 0 } as const;
+  assert.equal(demoOffered(real, kst(11, 22, 12), depart, end), true);
+  assert.equal(demoOffered(real, depart - 24 * 60 * MIN - 1, depart, end), true);
+  assert.equal(demoOffered(real, kst(12, 24, 17), depart, end), false); // 출발 전 당일
+  assert.equal(demoOffered(real, depart + MIN, depart, end), false); // 여정 중
+  assert.equal(demoOffered(real, end + MIN, depart, end), true); // 끝난 뒤 "다시 보기"
+  const demo = startDemoClock(kst(12, 24, 23, 50), 60, 0);
+  assert.equal(demoOffered(demo, depart + MIN, depart, end), true);
+});
+
+test("DEMO_BOOT_SCRIPT: parseClockConfig가 데모로 읽는 주소일 때만 data-demo=on", () => {
+  const cases = [
+    "",
+    "?speed=60",
+    "?demo=",
+    "?demo=어제",
+    "?demo=2026-12-25T00:20:00%2B09:00",
+    "?demo=2026-12-25T00:20:00%2B09:00&speed=60",
+    "?demo=2026-12-24T23:30:00+09:00", // +가 공백이 되어 읽지 못한다(두 쪽 모두)
+    "?demo=2026-12-24",
+    "?ref=x&demo=2026-12-24T15:00:00Z",
+  ];
+  for (const search of cases) {
+    const attrs: Record<string, string> = {};
+    new Function("location", "document", DEMO_BOOT_SCRIPT)(
+      { search },
+      { documentElement: { setAttribute: (k: string, v: string) => (attrs[k] = v) } },
+    );
+    const expected = parseClockConfig(search, 0).mode === "demo" ? { "data-demo": "on" } : {};
+    assert.deepEqual(attrs, expected, search);
+  }
 });

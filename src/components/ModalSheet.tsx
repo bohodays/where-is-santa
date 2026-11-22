@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type TransitionEvent,
 } from "react";
+import { sheetEntryPopped, sheetEntryPushed } from "@/hooks/sheetHistory";
 import { SheetHandle } from "./BottomSheet";
 import { IconButton } from "./IconButton";
 import { CloseIcon } from "./icons";
@@ -61,10 +62,14 @@ export function ModalSheet({ open, onClose, title, subtitle, children }: ModalSh
     if (open && !pushedRef.current) {
       window.history.pushState(window.history.state, "");
       pushedRef.current = true;
+      sheetEntryPushed(); // 데모 주소를 바꾸는 쪽이 이 칸이 빠질 때까지 기다린다(sheetHistory.ts)
     }
     if (!open && pushedRef.current) {
       pushedRef.current = false;
-      if (!closingByBackRef.current) window.history.back();
+      if (!closingByBackRef.current) {
+        sheetEntryPopped();
+        window.history.back();
+      }
       closingByBackRef.current = false;
     }
   }, [open]);
@@ -73,6 +78,7 @@ export function ModalSheet({ open, onClose, title, subtitle, children }: ModalSh
     const onBack = () => {
       if (!pushedRef.current) return; // 우리가 더한 칸이 아니다(다른 이유의 뒤로 가기)
       closingByBackRef.current = true;
+      sheetEntryPopped(); // 뒤로 가기로 칸이 이미 빠졌다
       onCloseRef.current();
     };
     window.addEventListener("popstate", onBack);

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { BottomSheet } from "./BottomSheet";
 import { NorthPoleScene } from "./NorthPoleScene";
@@ -10,7 +11,7 @@ const kst = (m: number, d: number, h: number, min = 0) => Date.UTC(2026, m - 1, 
 const meta = {
   title: "메인/NorthPoleScene",
   component: NorthPoleScene,
-  args: { phase: "before", first: ROUTE_SUMMARY.first, now: kst(11, 21, 21) },
+  args: { phase: "before", first: ROUTE_SUMMARY.first, now: kst(11, 21, 21), onPreview: fn() },
   argTypes: { first: { control: false }, now: { control: "date" } },
   parameters: { layout: "fullscreen" },
   decorators: [
@@ -31,10 +32,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Before: Story = { name: "출발 전 (한 달 넘게)" };
-export const BeforeTonight: Story = { name: "출발 전 (당일 저녁)", args: { now: kst(12, 24, 17) } };
+// 진짜 이브에는 미리 보기를 권하지 않는다(demoOffered)
+export const BeforeTonight: Story = {
+  name: "출발 전 (당일 저녁, 미리 보기 없음)",
+  args: { now: kst(12, 24, 17), onPreview: undefined },
+};
 export const BeforeAbroad: Story = {
   name: "출발 전 (해외 기기)",
-  args: { now: kst(12, 24, 17), showZone: true },
+  args: { now: kst(12, 24, 17), showZone: true, onPreview: undefined },
 };
 export const After: Story = { name: "끝난 뒤", args: { phase: "after", now: kst(12, 26, 9) } };
 export const Loading: Story = { name: "불러오는 중", args: { now: null } };
