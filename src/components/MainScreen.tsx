@@ -1,18 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useClock, useNow } from "@/hooks/useNow";
+import {
+  changeDemoSpeed,
+  startDemo,
+  stopDemo,
+  useClock,
+  useClockConfig,
+  useNow,
+} from "@/hooks/useNow";
 import { useHome } from "@/hooks/useHome";
 import { useMapTone } from "@/hooks/useMapTone";
 import { useNeighborhoods } from "@/hooks/useNeighborhoods";
 import { useRoute } from "@/hooks/useRoute";
 import { useSettings } from "@/hooks/useSettings";
+import { demoOffered } from "@/lib/santa/clock";
 import { formatKstTime, needsKstLabel } from "@/lib/santa/format";
 import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { journeyPhase } from "@/lib/santa/santa";
 import { ArrivalList } from "./ArrivalList";
 import { BottomSheet } from "./BottomSheet";
 import { CountdownCard } from "./CountdownCard";
+import { DemoBadge } from "./DemoBadge";
+import { DemoPanel } from "./DemoPanel";
 import { IconButton } from "./IconButton";
 import { GearIcon } from "./icons";
 import { JourneyProgress } from "./JourneyProgress";
@@ -27,7 +37,8 @@ import { SettingsPanel } from "./SettingsPanel";
 // 위: 출발 전·끝난 뒤는 북극 마을 그림, 여정 중에는 세계 지도(SantaMap) + 위치 알약.
 // 지도는 프레임마다 산타를 옮기므로 시각 대신 시계를 읽는 함수(useClock)를 받는다. 둘 다 같은 보정 시계다.
 // 아래: 고정형 시트에 우리 동네 카운트다운과 여정 막대.
-// 데모: 주소에 ?demo=2026-12-25T00:20:00%2B09:00&speed=60 을 붙이면 그 시각부터 흐른다(useNow).
+// 데모: 북극 마을의 "이브 밤으로 미리 보기"로 데모 시트를 열어 시간 이동한다. 데모 중에는 맨 위에 "데모 모드" 띠.
+// 주소에 ?demo=2026-12-25T00:20:00%2B09:00&speed=60 을 붙여도 된다(useNow). 시트에서 바꾸면 주소도 같이 바뀐다.
 
 // 첫 화면은 경로 요약(첫 도착·마지막 도착)과 고른 동네(useHome, 이름·좌표째 저장)만 쓴다.
 // 전체 경로(661곳)는 출발 직전에(useRoute), 시군구 목록은 동네 고르기를 열 때(useNeighborhoods) 불러온다.
@@ -43,6 +54,14 @@ export function MainScreen() {
   const { home, chosen, known, setHome } = useHome();
   const { settings, reduceMotion, deviceReducedMotion, update, setReduceMotion } = useSettings();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const clock = useClockConfig();
+  const demoSpeed = clock?.mode === "demo" ? clock.speed : null;
+  const [demoOpen, setDemoOpen] = useState(false);
+  // 진짜 이브(출발 하루 전~여정 끝)에는 미리 보기를 권하지 않는다
+  const onPreview =
+    clock !== null && now !== null && demoOffered(clock, now, FIRST.arriveUtc, LAST.arriveUtc)
+      ? () => setDemoOpen(true)
+      : undefined;
   // 지도 밝기: 설정이 "자동"이면 우리 동네 해에 맞춰 낮/밤, "밝게"·"어둡게"면 그대로
   useMapTone(now, home, settings.mapTone);
   const soon = now !== null && phase !== "after" && now >= FIRST.arriveUtc - PRELOAD_MS;
@@ -64,13 +83,23 @@ export function MainScreen() {
     // 100dvh: 휴대폰 주소창이 접혔다 펴져도 화면 높이에 맞는다. 모르는 브라우저는 100vh(h-screen)
     <main className="mx-auto flex h-screen max-w-md flex-col bg-night supports-[height:100dvh]:h-dvh">
       <h1 className="sr-only">산타 어디쯤</h1>
+      {/* 데모 중에만 보인다(<html data-demo>). 위쪽 칸(지도·그림)이 그만큼 줄어든다 */}
+      <DemoBadge speed={demoSpeed} onOpen={() => setDemoOpen(true)} />
 
       {/* 위쪽: 시트 둥근 모서리 뒤로 지도·그림이 이어져 보이게 시트를 살짝(-mt-6) 겹친다 */}
       <div className="relative min-h-0 flex-1">
         {phase === "before" && (
-          <NorthPoleScene phase="before" now={now} first={FIRST} showZone={showZone} />
+          <NorthPoleScene
+            phase="before"
+            now={now}
+            first={FIRST}
+            showZone={showZone}
+            onPreview={onPreview}
+          />
         )}
-        {phase === "after" && <NorthPoleScene phase="after" now={now} first={FIRST} />}
+        {phase === "after" && (
+          <NorthPoleScene phase="after" now={now} first={FIRST} onPreview={onPreview} />
+        )}
         {onJourney && (
           <div className="absolute inset-0 bg-map-sea">
             {route.status === "ready" && readClock && (
@@ -129,6 +158,27 @@ export function MainScreen() {
           route={route.status === "ready" ? route.route : null}
           loadFailed={route.status === "failed"}
           homeId={home.id}
+        />
+      </ModalSheet>
+
+      <ModalSheet
+        open={demoOpen}
+        onClose={() => setDemoOpen(false)}
+        title={demoSpeed !== null ? "데모 모드" : "미리 체험해 보기"}
+      >
+        <DemoPanel
+          activeSpeed={demoSpeed}
+          homeName={known ? home.name : null}
+          // 시간 이동·끝내기는 시트를 닫는다(시계는 바로 바뀌고, 주소는 시트 칸이 빠진 뒤 바뀐다: useNow)
+          onStart={(speed) => {
+            startDemo(home.arriveUtc, speed);
+            setDemoOpen(false);
+          }}
+          onSpeedChange={changeDemoSpeed}
+          onStop={() => {
+            stopDemo();
+            setDemoOpen(false);
+          }}
         />
       </ModalSheet>
 

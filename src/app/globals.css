@@ -231,6 +231,11 @@ html[data-text-size="large"] {
     display: none;
   }
 
+  /* 데모 중이 아니면 "데모 모드" 띠를 숨긴다(DEMO_BOOT_SCRIPT, DemoBadge). 첫 화면부터 맞아서 띠가 나중에 생기며 밀리지 않는다 */
+  html:not([data-demo="on"]) .demo-only {
+    display: none;
+  }
+
   /* 시트가 열려 있는 동안 뒤 화면이 스크롤되지 않게 */
   html:has(.modal-sheet[open]) {
     overflow: hidden;
