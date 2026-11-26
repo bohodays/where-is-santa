@@ -33,3 +33,20 @@ jobs:
 
       - name: Build Storybook
         run: npm run build-storybook
+
+      # E2E(Playwright): 위에서 만든 운영 빌드를 띄워 휴대폰 크기 Chromium으로 실제 흐름을 확인한다
+      - name: Playwright 브라우저 설치
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E
+        run: npm run test:e2e
+
+      - name: E2E 결과(실패 때 확인용)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
