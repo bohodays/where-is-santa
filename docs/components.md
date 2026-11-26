@@ -242,5 +242,5 @@
 3. ✅ **경로 데이터 생성 스크립트 (2026-11-21 완료, `docs/data-route.md`):** 샘플 53곳 → GeoNames + 시군구 데이터(기획서 핵심 기능 구현 항목)
 4. ✅ **지도 (2026-11-22 완료):** `SantaMap`·`MapAttribution`, 낮/밤(`sunTimes`·`useMapTone`), 장애 대응
 5. ✅ **시트 (2026-11-22 완료):** `ArrivalList`, `NeighborhoodPicker`(`matchChosung`·`nearestNeighborhoods`·`useHome`), `SettingsPanel`·`AttributionBox`(`useSettings`)
-6. **E2E:** Playwright로 시계를 고정해 이브 밤 흐름 확인(CLAUDE.md: 3주차부터)
+6. ✅ **E2E (2026-11-22 완료):** Playwright(`@playwright/test` 1.65.0, 승인 2026-11-22), `e2e/`, `npm run test:e2e`, CI에서도 실행. 장면 7개: 데모 시간 이동과 20초 뒤 도착, 데모 배속·새로고침·뒤로 가기·끝내기, 진짜 이브에는 미리 보기 없음, 여정 중 시트와 뒤로 가기, 끝난 뒤, 동네 고르기(초성)와 저장, 큰 글씨·고대비 저장. 장면마다 콘솔 오류 0, axe, 화면 밀림(CLS < 0.01), `<head>` 스크립트가 React보다 먼저 켰는지. 시각은 데모 주소로 정하고, 실제 모드는 기기 시계와 서버 Date 헤더를 함께 가짜로 맞춘다(`fixTime`: 기기 시계만 바꾸면 앱이 서버 시각으로 되돌린다)
 7. ✅ **데모 모드 (2026-11-22 완료, 5주차에서 앞당김):** `DemoPanel`·`DemoBadge`, `useNow`의 데모 켜기·배속·끝내기, 주소 반영
