@@ -1,6 +1,6 @@
 import { describe, test } from "vitest";
 import assert from "node:assert/strict";
-import { formatKstTime, formatRemaining, needsKstLabel } from "./format";
+import { formatKstDateTime, formatKstTime, formatRemaining, needsKstLabel } from "./format";
 
 const SEC = 1_000;
 const MIN = 60 * SEC;
@@ -90,6 +90,22 @@ describe("formatKstTime: 한국 시각", () => {
     assert.equal(
       formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21, 0), zone),
       "한국 시각 12월 24일 밤 12시 32분",
+    );
+  });
+});
+
+describe("formatKstDateTime: 날짜를 늘 붙인 한국 시각 (공유 카드)", () => {
+  test("보는 날과 상관없이 날짜를 쓴다", () => {
+    assert.equal(formatKstDateTime(kst(12, 24, 19, 29, 26)), "12월 24일 밤 7시 29분");
+    assert.equal(formatKstDateTime(kst(12, 25, 1, 14)), "12월 25일 새벽 1시 14분");
+    assert.equal(formatKstDateTime(kst(12, 24, 12, 0)), "12월 24일 낮 12시");
+  });
+
+  test('"밤 12시대"(0시)는 전날 밤 날짜로 쓴다 (화면의 formatKstTime과 같은 규칙)', () => {
+    assert.equal(formatKstDateTime(kst(12, 25, 0, 20)), "12월 24일 밤 12시 20분");
+    assert.equal(
+      formatKstDateTime(kst(12, 25, 0, 32)),
+      formatKstTime(kst(12, 25, 0, 32), kst(11, 19, 21)),
     );
   });
 });

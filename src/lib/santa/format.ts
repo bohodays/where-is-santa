@@ -61,10 +61,21 @@ export function formatKstTime(
   if (diff === 0) return `${zone}${time}`;
   if (diff === 1) return `${zone}내일 ${time}`;
   if (diff === -1) return `${zone}어제 ${time}`;
+  return `${zone}${formatKstDateTime(at)}`;
+}
+
+/**
+ * 날짜를 늘 붙인 한국 시각. 예) 12월 24일 밤 12시 20분, 12월 25일 새벽 1시 14분
+ * 보는 날짜를 모르는 곳(공유 카드 그림)에 쓴다. 화면에서는 오늘·내일을 가려 쓰는 formatKstTime을 쓴다.
+ */
+export function formatKstDateTime(at: number): string {
+  const local = new Date(at + KST_OFFSET);
+  const minutes = local.getUTCMinutes();
+  const time = `${hourLabel(local.getUTCHours())}${minutes > 0 ? ` ${minutes}분` : ""}`;
   // "밤 12시대"(0시)는 전날 밤 날짜로 쓴다. "12월 25일 밤 12시 32분"이라 하면 25일 밤(하루 뒤)으로 읽힌다.
   // "새벽 1시"부터는 달력 날짜 그대로가 자연스럽다("12월 25일 새벽 1시 14분").
   const dateOf = local.getUTCHours() === 0 ? new Date(at + KST_OFFSET - DAY) : local;
-  return `${zone}${dateOf.getUTCMonth() + 1}월 ${dateOf.getUTCDate()}일 ${time}`;
+  return `${dateOf.getUTCMonth() + 1}월 ${dateOf.getUTCDate()}일 ${time}`;
 }
 
 const CLOCK_PARTS: Intl.DateTimeFormatOptions = {

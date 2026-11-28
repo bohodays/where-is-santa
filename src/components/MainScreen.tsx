@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   changeDemoSpeed,
   startDemo,
@@ -20,6 +20,7 @@ import { ROUTE_SUMMARY } from "@/lib/santa/route-summary";
 import { journeyPhase } from "@/lib/santa/santa";
 import { ArrivalList } from "./ArrivalList";
 import { BottomSheet } from "./BottomSheet";
+import { Button } from "./Button";
 import { CountdownCard } from "./CountdownCard";
 import { DemoBadge } from "./DemoBadge";
 import { DemoPanel } from "./DemoPanel";
@@ -30,8 +31,10 @@ import { loadMapLibrary, SantaMap } from "./map/SantaMap";
 import { ModalSheet } from "./ModalSheet";
 import { NeighborhoodPicker } from "./NeighborhoodPicker";
 import { NorthPoleScene } from "./NorthPoleScene";
+import { ReceivedPanel } from "./ReceivedPanel";
 import { SantaLocationBanner } from "./SantaLocationBanner";
 import { SettingsPanel } from "./SettingsPanel";
+import { SharePanel } from "./SharePanel";
 
 // 메인 화면(컨테이너). 현재 시각을 읽는 곳은 여기 한 곳이다(useNow). 아래 조각들은 now를 받아 보여주기만 한다.
 // 위: 출발 전·끝난 뒤는 북극 마을 그림, 여정 중에는 세계 지도(SantaMap) + 위치 알약.
@@ -39,6 +42,9 @@ import { SettingsPanel } from "./SettingsPanel";
 // 아래: 고정형 시트에 우리 동네 카운트다운과 여정 막대.
 // 데모: 북극 마을의 "이브 밤으로 미리 보기"로 데모 시트를 열어 시간 이동한다. 데모 중에는 맨 위에 "데모 모드" 띠.
 // 주소에 ?demo=2026-12-25T00:20:00%2B09:00&speed=60 을 붙여도 된다(useNow). 시트에서 바꾸면 주소도 같이 바뀐다.
+// 공유: 아래 시트의 "친구에게 알려주기"로 공유 시트를 연다. 공유 링크(/s/[id])로 들어오면 received가 있고,
+// 처음에 "친구가 보낸 산타 소식" 시트를 띄운다. 두 시트 모두 "동네 고르기"를 누르면 같은 시트 안에서 동네 고르기로 바뀐다
+// (시트를 닫자마자 다른 시트를 열면, 닫으며 되돌린 방문 기록 칸이 새 시트의 칸까지 빼서 새 시트가 바로 닫힌다: ModalSheet).
 
 // 첫 화면은 경로 요약(첫 도착·마지막 도착)과 고른 동네(useHome, 이름·좌표째 저장)만 쓴다.
 // 전체 경로(661곳)는 출발 직전에(useRoute), 시군구 목록은 동네 고르기를 열 때(useNeighborhoods) 불러온다.
@@ -46,7 +52,14 @@ const { first: FIRST, last: LAST } = ROUTE_SUMMARY;
 /** 출발 이만큼 전부터 전체 경로와 지도 JS를 미리 받아 둔다. 출발 순간 "산타를 찾는 중…"이 길게 보이지 않게 */
 const PRELOAD_MS = 10 * 60_000;
 
-export function MainScreen() {
+type SheetView = "main" | "picker";
+
+type MainScreenProps = {
+  /** 공유 링크로 들어왔을 때: 보낸 사람의 인사말(다듬은 것, 없으면 "") */
+  received?: { greeting: string };
+};
+
+export function MainScreen({ received }: MainScreenProps) {
   const now = useNow();
   const phase = now === null ? null : journeyPhase(now, FIRST.arriveUtc, LAST.arriveUtc);
   const onJourney = phase === "journey";
@@ -70,7 +83,23 @@ export function MainScreen() {
   const route = useRoute(soon || arrivalsOpen);
   const openArrivals = () => setArrivalsOpen(true);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const neighborhoods = useNeighborhoods(pickerOpen);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareView, setShareView] = useState<SheetView>("main");
+  const [receivedOpen, setReceivedOpen] = useState(false);
+  const [receivedView, setReceivedView] = useState<SheetView>("main");
+  const neighborhoods = useNeighborhoods(
+    pickerOpen ||
+      (shareOpen && shareView === "picker") ||
+      (receivedOpen && receivedView === "picker"),
+  );
+  // 공유 링크로 들어오면 저장된 동네를 읽은 뒤 한 번 인사말 시트를 띄운다.
+  // 인사말이 없고 이미 동네를 고른 사람에게는 알려줄 것이 없어 띄우지 않는다
+  const receivedShown = useRef(false);
+  useEffect(() => {
+    if (!received || !known || receivedShown.current) return;
+    receivedShown.current = true;
+    if (received.greeting || !chosen) setReceivedOpen(true);
+  }, [received, known, chosen]);
   // 지도 JS(약 1MB)도 출발 전에 미리 받아 둔다. 실패해도 여기서는 조용히 넘기고, 지도를 그릴 때 다시 시도한다
   useEffect(() => {
     if (soon) loadMapLibrary().catch(() => {});
@@ -79,15 +108,34 @@ export function MainScreen() {
   const showZone =
     now !== null && needsKstLabel(Intl.DateTimeFormat().resolvedOptions().timeZone, now);
 
+  // 동네 고르기 내용. 동네 시트, 공유 시트, 인사말 시트가 같이 쓴다.
+  // 고르면 바로 저장한다. 카운트다운·도착 순서·지도가 새 동네로 바뀐다
+  const picker = (afterPick: () => void) => (
+    <NeighborhoodPicker
+      now={now}
+      home={home}
+      chosen={chosen}
+      neighborhoods={neighborhoods.status === "ready" ? neighborhoods.neighborhoods : null}
+      loadFailed={neighborhoods.status === "failed"}
+      onPick={(n) => {
+        setHome(n);
+        afterPick();
+      }}
+    />
+  );
+
   return (
-    // 100dvh: 휴대폰 주소창이 접혔다 펴져도 화면 높이에 맞는다. 모르는 브라우저는 100vh(h-screen)
-    <main className="mx-auto flex h-screen max-w-md flex-col bg-night supports-[height:100dvh]:h-dvh">
+    // 100dvh: 휴대폰 주소창이 접혔다 펴져도 화면 높이에 맞는다. 모르는 브라우저는 100vh(min-h-screen).
+    // 높이를 고정하지 않고 최소값으로 둔다: 아주 작은 화면(320×568)이나 큰 글씨에서 위쪽 칸이 최소 높이보다 작아지면
+    // 시트가 위쪽 칸(미리 보기 버튼)을 덮는 대신 아래로 밀리고 페이지가 스크롤된다. 보통 화면에서는 꼭 맞아 스크롤이 없다
+    <main className="mx-auto flex min-h-screen max-w-md flex-col bg-night supports-[height:100dvh]:min-h-dvh">
       <h1 className="sr-only">산타 어디쯤</h1>
       {/* 데모 중에만 보인다(<html data-demo>). 위쪽 칸(지도·그림)이 그만큼 줄어든다 */}
       <DemoBadge speed={demoSpeed} onOpen={() => setDemoOpen(true)} />
 
       {/* 위쪽: 시트 둥근 모서리 뒤로 지도·그림이 이어져 보이게 시트를 살짝(-mt-6) 겹친다 */}
-      <div className="relative min-h-0 flex-1">
+      {/* 최소 16rem: 북극 마을 글자와 "이브 밤으로 미리 보기"(약 200px)에 시트가 겹치는 24px을 더한 높이. 큰 글씨면 같이 커진다 */}
+      <div className="relative min-h-[16rem] flex-1">
         {phase === "before" && (
           <NorthPoleScene
             phase="before"
@@ -140,6 +188,15 @@ export function MainScreen() {
           showZone={showZone}
           onShowArrivals={openArrivals}
         />
+        <Button
+          className="w-full"
+          onClick={() => {
+            setShareView("main");
+            setShareOpen(true);
+          }}
+        >
+          친구에게 알려주기
+        </Button>
       </BottomSheet>
 
       <ModalSheet
@@ -193,18 +250,38 @@ export function MainScreen() {
       </ModalSheet>
 
       <ModalSheet open={pickerOpen} onClose={() => setPickerOpen(false)} title="우리 동네 고르기">
-        <NeighborhoodPicker
-          now={now}
-          home={home}
-          chosen={chosen}
-          neighborhoods={neighborhoods.status === "ready" ? neighborhoods.neighborhoods : null}
-          loadFailed={neighborhoods.status === "failed"}
-          // 고르면 바로 저장하고 닫는다. 카운트다운·도착 순서·지도가 새 동네로 바뀐다
-          onPick={(n) => {
-            setHome(n);
-            setPickerOpen(false);
-          }}
-        />
+        {picker(() => setPickerOpen(false))}
+      </ModalSheet>
+
+      <ModalSheet
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={shareView === "picker" ? "우리 동네 고르기" : "친구에게 알려주기"}
+      >
+        {shareView === "picker" ? (
+          // 고르면 공유 시트로 돌아온다. 카드가 새 동네로 바뀐다
+          picker(() => setShareView("main"))
+        ) : (
+          <SharePanel home={home} chosen={chosen} onPickHome={() => setShareView("picker")} />
+        )}
+      </ModalSheet>
+
+      <ModalSheet
+        open={receivedOpen}
+        onClose={() => setReceivedOpen(false)}
+        title={receivedView === "picker" ? "우리 동네 고르기" : "친구가 보낸 산타 소식"}
+      >
+        {receivedView === "picker" ? (
+          picker(() => setReceivedOpen(false))
+        ) : (
+          <ReceivedPanel
+            greeting={received?.greeting ?? ""}
+            homeName={home.name}
+            chosen={chosen}
+            onPickHome={() => setReceivedView("picker")}
+            onClose={() => setReceivedOpen(false)}
+          />
+        )}
       </ModalSheet>
     </main>
   );

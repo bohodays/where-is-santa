@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 앱 아이콘: 지도와 공유 카드의 산타 표시(빨간 원 + 흰 모자). 색은 globals.css의 --color-santa -->
+  <circle cx="32" cy="32" r="30" fill="#d6453b" stroke="#ffffff" stroke-width="3"/>
+  <g transform="translate(13 12) scale(1.6)">
+    <path d="M5 17 L12 4 L19 17 Z" fill="#ffffff"/>
+    <rect x="4" y="16" width="16" height="4" rx="2" fill="#ffffff"/>
+    <circle cx="12" cy="3.6" r="2" fill="#ffffff"/>
+  </g>
+</svg>

@@ -29,15 +29,21 @@ const INIT = `
 `;
 
 type Fixtures = {
-  /** 콘솔 오류·경고와 페이지 예외. 장면이 끝날 때 비어 있어야 한다 */
+  /** 콘솔 오류·경고, 페이지 예외, 우리 서버의 실패 응답. 장면이 끝날 때 비어 있어야 한다 */
   consoleErrors: string[];
 };
 
 export const test = base.extend<Fixtures>({
   // auto: 장면이 이 값을 쓰지 않아도 늘 켠다(준비 스크립트와 오류 검사가 모든 장면에 걸리게)
   consoleErrors: [
-    async ({ page }, use) => {
+    async ({ page, baseURL }, use) => {
       const errors: string[] = [];
+      // 페이지가 우리 서버에 보낸 요청 중 404·500을 받은 것. 콘솔 메시지("Failed to load resource")보다 어느 주소인지 분명하다.
+      // 단, 브라우저가 페이지 밖에서 보내는 favicon 요청은 여기에 오지 않는다(그건 share.spec의 아이콘 검사가 맡는다)
+      page.on("response", (r) => {
+        if (r.status() >= 400 && baseURL && r.url().startsWith(baseURL))
+          errors.push(`${r.status()} ${r.url()}`);
+      });
       page.on("console", (m) => {
         // 헤드리스 브라우저의 소프트웨어 그래픽 드라이버가 내는 알림("GL Driver Message … GPU stall")은 앱 오류가 아니다
         if (m.text().startsWith("[.WebGL-")) return;

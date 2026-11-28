@@ -5,9 +5,21 @@ import { SETTINGS_BOOT_SCRIPT } from "@/lib/santa/settings";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 
+const DESCRIPTION = "크리스마스이브, 산타가 우리 동네에 오기까지 남은 시간";
+
+// 링크 미리보기(메신저)용 글자. 그림은 src/app/opengraph-image.tsx, 공유 링크는 src/app/s/[id]가 자기 것으로 바꾼다.
+// 그림 주소의 앞부분(https://…)은 Vercel이 알려 주는 배포 주소를 Next.js가 붙인다(metadataBase 기본값)
 export const metadata: Metadata = {
   title: "산타 어디쯤",
-  description: "크리스마스이브, 산타가 우리 동네에 오기까지 남은 시간",
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "산타 어디쯤",
+    locale: "ko_KR",
+    title: "산타 어디쯤",
+    description: DESCRIPTION,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
